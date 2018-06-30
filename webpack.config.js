@@ -14,7 +14,7 @@ module.exports = {
     library: '@bonbons/core',
     libraryTarget: 'umd'
   },
-  mode: "production",
+  mode: "development",
   resolve: {
     modules: ["node_modules"],
     extensions: [".js", ".ts"]

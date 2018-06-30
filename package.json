@@ -1,6 +1,6 @@
 {
   "name": "@bonbons/core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "@bonbons/core",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -18,14 +18,14 @@
   },
   "homepage": "https://github.com/ws-Bonbons/core#readme",
   "dependencies": {
-    "@bonbons/contracts": "^1.0.3",
-    "@bonbons/controllers": "^1.0.0",
-    "@bonbons/decorators": "^1.0.0",
-    "@bonbons/di": "^1.0.2",
-    "@bonbons/options": "^1.0.1",
-    "@bonbons/pipes": "^1.0.0",
-    "@bonbons/plugins": "^1.0.1",
-    "@bonbons/utils": "^1.0.4"
+    "@bonbons/contracts": "^1.0.4",
+    "@bonbons/controllers": "^1.0.1",
+    "@bonbons/decorators": "^1.0.1",
+    "@bonbons/di": "^1.0.3",
+    "@bonbons/options": "^1.0.2",
+    "@bonbons/pipes": "^1.0.1",
+    "@bonbons/plugins": "^1.0.2",
+    "@bonbons/utils": "^1.0.5"
   },
   "devDependencies": {
     "@types/koa": "^2.0.46",

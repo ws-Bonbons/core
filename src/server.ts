@@ -404,7 +404,7 @@ export class BonbonsServer implements IServer {
     this.option(TPL_RENDER_COMPILER, { compiler: factory && factory(this._readonlyConfigs) });
   }
 
-  private _clearServer = () => {
+  private _clearServer(): void {
     delete this._app;
     delete this._ctlrs;
     delete this._mwares;
@@ -415,7 +415,7 @@ export class BonbonsServer implements IServer {
     delete this._clearServer;
   }
 
-  private $$configsInitialization(config?: BonbonsServerConfig) {
+  private $$configsInitialization(config?: BonbonsServerConfig): void {
     if (config) {
       this._ctlrs = config.controller || [];
       resolveInjections(this._scoped, config.scoped || []);
@@ -441,7 +441,7 @@ export class BonbonsServer implements IServer {
     }
   }
 
-  private $$defaultOptionsInitialization() {
+  private $$defaultOptionsInitialization(): void {
     this.option(ENV_MODE, { mode: "development", trace: true });
     this.option(DEPLOY_MODE, { port: 3000 });
     this.option(CONFIG_COLLECTION, this._configs);
@@ -462,7 +462,7 @@ export class BonbonsServer implements IServer {
     this.option(URL_FORM_OPTIONS, { formLimit: "56kb" });
   }
 
-  private $$useCommonOptions() {
+  private $$useCommonOptions(): void {
     const { mode } = this._configs.get(ENV_MODE);
     this._isDev = mode === "development";
     const { port } = this._configs.get(DEPLOY_MODE);
@@ -474,7 +474,7 @@ export class BonbonsServer implements IServer {
     this._mwares.unshift([handler, [this._readonlyConfigs]]);
   }
 
-  private $$initLogger() {
+  private $$initLogger(): void {
     const Logger = Injectable()(this._configs.get(GLOBAL_LOGGER));
     const env = this._configs.get(ENV_MODE);
     this._logger = new Logger(env);
@@ -483,13 +483,13 @@ export class BonbonsServer implements IServer {
     this._logger.debug("core", this.$$initLogger.name, "-----------------------");
   }
 
-  private $$initDLookup() {
+  private $$initDLookup(): void {
     this._di = this._configs.get(DI_CONTAINER);
     this._readonlyDI = { get: this._di.get.bind(this._di) };
     this.singleton(InjectService, () => this._readonlyDI);
   }
 
-  private $$initDIContainer() {
+  private $$initDIContainer(): void {
     this._logger.debug("core", this.$$initDIContainer.name, "init DI container.");
     this._logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scoped.length)} ].`);
     this._scoped.forEach(([tk, imp]) => {
@@ -526,7 +526,7 @@ export class BonbonsServer implements IServer {
     return this;
   }
 
-  private $$useRouters() {
+  private $$useRouters(): void {
     this._logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
     const mainRouter = new KOARouter();
     this._ctlrs.forEach(controllerClass => {
@@ -550,7 +550,7 @@ export class BonbonsServer implements IServer {
     this.use(allowedMethods.bind(mainRouter));
   }
 
-  private $$resolveControllerMethod(method: string, item: IRoute, ctor: IConstructor<any>, name: string, router: KOARouter) {
+  private $$resolveControllerMethod(method: string, item: IRoute, ctor: IConstructor<any>, name: string, router: KOARouter): void {
     const { path, pipes, middlewares: mds } = item;
     if (!path) return;
     const { list: pipelist } = pipes;
@@ -564,13 +564,13 @@ export class BonbonsServer implements IServer {
     this.$$selectFuncMethod(router, method)(path, ...middlewares);
   }
 
-  private $$preparePipes() {
+  private $$preparePipes(): void {
     const pipes: KOAMiddleware[] = [];
     this.$$addPipeMiddlewares(this._pipes, pipes);
     pipes.forEach(pipe => this.use(() => pipe));
   }
 
-  private $$addPipeMiddlewares(pipelist: BonbonsPipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]) {
+  private $$addPipeMiddlewares(pipelist: BonbonsPipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
       const instance = createPipeInstance(bundle, this._di.resolveDeps(pipe) || [], getRequestContext(ctx));
@@ -578,15 +578,15 @@ export class BonbonsServer implements IServer {
     }));
   }
 
-  private $$useMiddlewares() {
+  private $$useMiddlewares(): void {
     this._mwares.forEach(([fac, args]) => this._app.use(fac(...(args || []))));
   }
 
-  private $$selectFormParser(route: IRoute, middlewares: any[]) {
+  private $$selectFormParser(route: IRoute, middlewares: any[]): void {
     if (route.form && route.form.parser) resolveFormParser(middlewares, route, this._configs);
   }
 
-  private $$decideFinalStep(route: IRoute, middlewares: KOAMiddleware[], constructor: any, methodName: string) {
+  private $$decideFinalStep(route: IRoute, middlewares: KOAMiddleware[], constructor: any, methodName: string): void {
     middlewares.push(async (ctx) => {
       const list = this._di.resolveDeps(constructor);
       const c = new constructor(...list);
@@ -597,7 +597,7 @@ export class BonbonsServer implements IServer {
     });
   }
 
-  private $$parseFuncParams(ctx: KOAContext, route: IRoute) {
+  private $$parseFuncParams(ctx: KOAContext, route: IRoute): any[] {
     const querys = (route.funcParams || []).map(({ key, type, isQuery }) => {
       const pack = isQuery ? ctx.query : ctx.params;
       return !type ? pack[key] : type(pack[key]);
@@ -613,7 +613,7 @@ export class BonbonsServer implements IServer {
     return querys;
   }
 
-  private $$selectFuncMethod(router: KOARouter, method: string) {
+  private $$selectFuncMethod(router: KOARouter, method: string): (...args: any[]) => void {
     let invoke: (...args: any[]) => void;
     switch (method) {
       case "GET":
