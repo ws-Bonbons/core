@@ -9,6 +9,8 @@ import { BonbonsServer, BaseApp } from "./server";
  */
 export const Bonbons = BonbonsServer;
 
+export * from "./decorator";
+
 export {
   BaseApp,
   BonbonsServer as Server

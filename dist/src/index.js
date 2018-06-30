@@ -1,4 +1,7 @@
 "use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("./server");
 exports.Server = server_1.BonbonsServer;
@@ -11,4 +14,5 @@ exports.BaseApp = server_1.BaseApp;
  * Use Bonbons.Create() to create a new app.
  */
 exports.Bonbons = server_1.BonbonsServer;
+__export(require("./decorator"));
 //# sourceMappingURL=index.js.map
