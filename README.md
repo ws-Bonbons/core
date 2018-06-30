@@ -5,7 +5,7 @@ This is an MVC framework based on node.js and koa2 (old version is based on expr
 
 The core features are under development. Currently, the dependency injection system is basically completed, the controller module is basically completed, and the GET method is also completed. 
 
-[![Build Status](https://travis-ci.org/ws-node/Bonbons.koa.svg?branch=master)](https://github.com/ws-node/Bonbons.koa/tree/master/%40Bonbons.koa/README.md)
+[![Build Status](https://travis-ci.org/ws-Bonbons/core.svg?branch=master)](https://travis-ci.org/ws-Bonbons/core)
 
 **Bonbons.koa is still in developing**.
 
