@@ -1,6 +1,6 @@
 {
   "name": "@bonbons/core",
-  "version": "1.0.5-beta",
+  "version": "1.0.6-beta",
   "description": "@bonbons/core",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -21,11 +21,11 @@
     "@bonbons/contracts": "^1.0.6-beta",
     "@bonbons/controllers": "^1.0.6-beta",
     "@bonbons/decorators": "^1.0.6-beta",
-    "@bonbons/di": "^1.0.3-beta",
-    "@bonbons/options": "^1.0.2-beta",
-    "@bonbons/pipes": "^1.0.1-beta",
-    "@bonbons/plugins": "^1.0.2-beta",
-    "@bonbons/utils": "^1.0.5-beta"
+    "@bonbons/di": "^1.0.6-beta",
+    "@bonbons/options": "^1.0.6-beta",
+    "@bonbons/pipes": "^1.0.6-beta",
+    "@bonbons/plugins": "^1.0.6-beta",
+    "@bonbons/utils": "^1.0.6-beta"
   },
   "devDependencies": {
     "@types/koa": "^2.0.46",
