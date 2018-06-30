@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "target": "es6",
     "module": "es2015",
+    "outDir": "./dist",
     "lib": [
       "es2016",
       "es2015"
