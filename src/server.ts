@@ -103,20 +103,22 @@ export class BonbonsServer implements IServer {
    * @type {IDIContainer}
    * @memberof BonbonsServer
    */
-  private _di!: IDIContainer;
-  private _readonlyDI!: ReadonlyDI;
-  private _readonlyConfigs!: ReadonlyConfigs;
-  private _logger!: GlobalLogger;
+  private $di!: IDIContainer;
+  private $rdi!: ReadonlyDI;
+  private $configs!: ReadonlyConfigs;
+  private $logger!: GlobalLogger;
 
-  private _app = new KOA();
+  private $app = new KOA();
+  private $confColls: IConfigs = new ConfigCollection();
+
+  private $port = 3000;
+  private $is_dev = true;
+
   private _ctlrs: IConstructor<any>[] = [];
-  private _configs: IConfigs = new ConfigCollection();
   private _mwares: KOAMiddlewareTuple[] = [];
   private _pipes: BonbonsPipeEntry[] = [];
-  private _scoped: [InjectableToken<any>, ImplementDIValue][] = [];
-  private _singleton: [InjectableToken<any>, ImplementDIValue][] = [];
-  private _port = 3000;
-  private _isDev = true;
+  private _scopeds: [InjectableToken<any>, ImplementDIValue][] = [];
+  private _singletons: [InjectableToken<any>, ImplementDIValue][] = [];
 
   constructor(config?: BonbonsServerConfig) {
     this.$$defaultOptionsInitialization();
@@ -177,10 +179,10 @@ export class BonbonsServer implements IServer {
       throw invalidOperation("DI token or entry is empty, you shouldn't call BonbonsServer.use<T>(...) without any param.");
     }
     if (!e2 || args.length === 2) {
-      this._configs.set(e1, optionAssign(this._configs, e1, e2));
+      this.$confColls.set(e1, optionAssign(this.$confColls, e1, e2));
     } else {
       const { token, value } = <Entry<any>>e1;
-      this._configs.set(token, optionAssign(this._configs, token, value));
+      this.$confColls.set(token, optionAssign(this.$confColls, token, value));
     }
     return this;
   }
@@ -213,12 +215,12 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template T
-   * @param {IConstructor<T>} srv
+   * @template TInject
+   * @param {IConstructor<TInject>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<T>(srv: IConstructor<T>): BonbonsServer;
+  public scoped<TInject>(srv: IConstructor<TInject>): BonbonsServer;
   /**
    * Set a scoped servics
    * ---
@@ -231,14 +233,14 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template B
-   * @template T
-   * @param {InjectableToken<B>} token
-   * @param {ImplementToken<T>} srv
+   * @template TToken
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {ImplementToken<TImplement>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<B, T>(token: InjectableToken<B>, srv: ImplementToken<T>): BonbonsServer;
+  public scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
   /**
    * Set a scoped servics
    * ---
@@ -252,14 +254,14 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template B
-   * @template T
-   * @param {InjectableToken<B>} token
-   * @param {InjectFactory<T>} srv
+   * @template TToken
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {InjectFactory<TImplement>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<B, T>(token: InjectableToken<B>, srv: InjectFactory<T>): BonbonsServer;
+  public scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
   /**
    * Set a scoped servics
    * ---
@@ -275,13 +277,14 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template T
-   * @param {InjectableToken} token
-   * @param {T} srv
+   * @template TInject
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {TImplement} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<B, T>(token: InjectableToken<B>, srv: T): BonbonsServer;
+  public scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
   public scoped(...args: any[]): BonbonsServer {
     return this.$$preInject(args[0], args[1], InjectScope.Scoped);
   }
@@ -296,12 +299,12 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template T
-   * @param {IConstructor<T>} srv
+   * @template TInject
+   * @param {IConstructor<TInject>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<T>(srv: IConstructor<T>): BonbonsServer;
+  public singleton<TInject>(srv: IConstructor<TInject>): BonbonsServer;
   /**
    * Set a singleton service
    * ---
@@ -315,14 +318,14 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template B
-   * @template T
-   * @param {InjectableToken<B>} token
-   * @param {ImplementToken<T>} srv
+   * @template TToken
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {ImplementToken<TImplement>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<B, T>(token: InjectableToken<B>, srv: ImplementToken<T>): BonbonsServer;
+  public singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
   /**
    * Set a singleton service
    * ---
@@ -336,14 +339,14 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template B
-   * @template T
+   * @template TToken
+   * @template TImplement
    * @param {InjectableToken<B>} token
-   * @param {InjectFactory<T>} srv
+   * @param {InjectFactory<TImplement>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<B, T>(token: InjectableToken<B>, srv: InjectFactory<T>): BonbonsServer;
+  public singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
   /**
    * Set a singleton service
    * ---
@@ -357,19 +360,20 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @author Big Mogician
-   * @template T
-   * @param {InjectableToken} token
-   * @param {T} srv
+   * @template TToken
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {TImplement} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<B, T>(token: InjectableToken<B>, srv: T): BonbonsServer;
+  public singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
   public singleton(...args: any[]): BonbonsServer {
     return this.$$preInject(args[0], args[1], InjectScope.Singleton);
   }
 
   public getConfigs() {
-    return this._configs.get(CONFIG_COLLECTION);
+    return this.$confColls.get(CONFIG_COLLECTION);
   }
 
   /**
@@ -388,38 +392,38 @@ export class BonbonsServer implements IServer {
     this.$$preparePipes();
     this.$$useRouters();
     this.$$useMiddlewares();
-    this._app.listen(this._port);
+    this.$app.listen(this.$port);
     this.$$afterRun();
     if (run) {
-      run(this._readonlyConfigs);
+      run(this.$configs);
     }
-    if (!this._isDev) {
+    if (!this.$is_dev) {
       this._clearServer();
     }
     // console.log(this._configs);
   }
 
   private $$afterRun() {
-    const { compilerFactory: factory } = this._configs.get(TPL_RENDER_COMPILER);
-    this.option(TPL_RENDER_COMPILER, { compiler: factory && factory(this._readonlyConfigs) });
+    const { compilerFactory: factory } = this.$confColls.get(TPL_RENDER_COMPILER);
+    this.option(TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
   }
 
   private _clearServer(): void {
-    delete this._app;
+    delete this.$app;
+    delete this.$port;
     delete this._ctlrs;
     delete this._mwares;
     delete this._pipes;
-    delete this._scoped;
-    delete this._singleton;
-    delete this._port;
+    delete this._scopeds;
+    delete this._singletons;
     delete this._clearServer;
   }
 
   private $$configsInitialization(config?: BonbonsServerConfig): void {
     if (config) {
       this._ctlrs = config.controller || [];
-      resolveInjections(this._scoped, config.scoped || []);
-      resolveInjections(this._singleton, config.singleton || []);
+      resolveInjections(this._scopeds, config.scoped || []);
+      resolveInjections(this._singletons, config.singleton || []);
       this._pipes.push(...(config.pipes || []));
       (config.middlewares || []).forEach(item => {
         if (item instanceof Array) {
@@ -442,9 +446,9 @@ export class BonbonsServer implements IServer {
   }
 
   private $$defaultOptionsInitialization(): void {
-    this.option(ENV_MODE, { mode: "development", trace: true });
-    this.option(DEPLOY_MODE, { port: 3000 });
-    this.option(CONFIG_COLLECTION, this._configs);
+    this.option(ENV_MODE, DEFAULTS.env);
+    this.option(DEPLOY_MODE, DEFAULTS.deploy);
+    this.option(CONFIG_COLLECTION, this.$confColls);
     this.option(DI_CONTAINER, new DIContainer());
     this.option(FILE_LOADER, defaultFileLoaderOptions);
     this.option(TPL_RENDER_COMPILER, defaultTplRenderCompilerOptions);
@@ -456,54 +460,54 @@ export class BonbonsServer implements IServer {
     this.option(STATIC_TYPED_RESOLVER, TypedSerializer);
     this.option(JSON_RESULT_OPTIONS, DEFAULTS.jsonResult);
     this.option(STRING_RESULT_OPTIONS, DEFAULTS.stringResult);
-    this.option(BODY_PARSE_OPTIONS, { enableTypes: ["json", "form"] });
-    this.option(JSON_FORM_OPTIONS, { jsonLimit: "1mb" });
-    this.option(TEXT_FORM_OPTIONS, { textLimit: "1mb" });
-    this.option(URL_FORM_OPTIONS, { formLimit: "56kb" });
+    this.option(BODY_PARSE_OPTIONS, DEFAULTS.koaBodyParser);
+    this.option(JSON_FORM_OPTIONS, DEFAULTS.jsonForm);
+    this.option(TEXT_FORM_OPTIONS, DEFAULTS.textForm);
+    this.option(URL_FORM_OPTIONS, DEFAULTS.urlForm);
   }
 
   private $$useCommonOptions(): void {
-    const { mode } = this._configs.get(ENV_MODE);
-    this._isDev = mode === "development";
-    const { port } = this._configs.get(DEPLOY_MODE);
-    this._port = port || 3000;
-    this._readonlyConfigs = { get: this._configs.get.bind(this._configs) };
-    this.singleton(ConfigService, () => this._readonlyConfigs);
-    this.singleton(RenderService, () => new BonbonsRender(this._readonlyConfigs));
-    const handler = this._configs.get(ERROR_HANDLER);
-    this._mwares.unshift([handler, [this._readonlyConfigs]]);
+    const { mode } = this.$confColls.get(ENV_MODE);
+    this.$is_dev = mode === "development";
+    const { port } = this.$confColls.get(DEPLOY_MODE);
+    this.$port = port || 3000;
+    this.$configs = { get: this.$confColls.get.bind(this.$confColls) };
+    this.singleton(ConfigService, () => this.$configs);
+    this.singleton(RenderService, () => new BonbonsRender(this.$configs));
+    const handler = this.$confColls.get(ERROR_HANDLER);
+    this._mwares.unshift([handler, [this.$configs]]);
   }
 
   private $$initLogger(): void {
-    const Logger = Injectable()(this._configs.get(GLOBAL_LOGGER));
-    const env = this._configs.get(ENV_MODE);
-    this._logger = new Logger(env);
-    this.singleton(GlobalLogger, () => this._logger);
-    this._logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(Logger.name)} ].`);
-    this._logger.debug("core", this.$$initLogger.name, "-----------------------");
+    const Logger = Injectable()(this.$confColls.get(GLOBAL_LOGGER));
+    const env = this.$confColls.get(ENV_MODE);
+    this.$logger = new Logger(env);
+    this.singleton(GlobalLogger, () => this.$logger);
+    this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(Logger.name)} ].`);
+    this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
   }
 
   private $$initDLookup(): void {
-    this._di = this._configs.get(DI_CONTAINER);
-    this._readonlyDI = { get: this._di.get.bind(this._di) };
-    this.singleton(InjectService, () => this._readonlyDI);
+    this.$di = this.$confColls.get(DI_CONTAINER);
+    this.$rdi = { get: this.$di.get.bind(this.$di) };
+    this.singleton(InjectService, () => this.$rdi);
   }
 
   private $$initDIContainer(): void {
-    this._logger.debug("core", this.$$initDIContainer.name, "init DI container.");
-    this._logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scoped.length)} ].`);
-    this._scoped.forEach(([tk, imp]) => {
+    this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
+    this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
+    this._scopeds.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.Scoped);
-      this._logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
-    this._logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singleton.length)} ].`);
-    this._singleton.forEach(([tk, imp]) => {
+    this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
+    this._singletons.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.Singleton);
-      this._logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
-    this._di.complete();
-    this._logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this._di.count)} ].`);
-    this._logger.debug("core", this.$$initDIContainer.name, "-----------------------");
+    this.$di.complete();
+    this.$logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
+    this.$logger.debug("core", this.$$initDIContainer.name, "-----------------------");
   }
 
   private $$preInject(provide: any, type: InjectScope): BonbonsServer;
@@ -512,8 +516,8 @@ export class BonbonsServer implements IServer {
     if (!provide) return this;
     type = type || InjectScope.Singleton;
     type === InjectScope.Scoped ?
-      this._scoped.push([provide, classType || provide]) :
-      this._singleton.push([provide, classType || provide]);
+      this._scopeds.push([provide, classType || provide]) :
+      this._singletons.push([provide, classType || provide]);
     return this;
   }
 
@@ -522,18 +526,18 @@ export class BonbonsServer implements IServer {
   private $$injectaFinally(provide: any, classType?: any, type?: InjectScope): BonbonsServer {
     if (!provide) return this;
     type = type || InjectScope.Singleton;
-    this._di.register(provide, classType || provide, type);
+    this.$di.register(provide, classType || provide, type);
     return this;
   }
 
   private $$useRouters(): void {
-    this._logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
+    this.$logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
     const mainRouter = new KOARouter();
     this._ctlrs.forEach(controllerClass => {
       const proto = controllerClass.prototype;
       const { router } = <ControllerMetadata>(proto.getConfig && proto.getConfig());
       const thisRouter = new KOARouter({ prefix: router.prefix as string });
-      this._logger.debug("core", this.$$useRouters.name,
+      this.$logger.debug("core", this.$$useRouters.name,
         `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${COLORS.green}${Object.keys(router.routes).length}${COLORS.reset} ]`);
       Object.keys(router.routes).forEach(methodName => {
         const item = router.routes[methodName];
@@ -543,8 +547,8 @@ export class BonbonsServer implements IServer {
       });
       mainRouter.use(thisRouter.routes()).use(thisRouter.allowedMethods());
     });
-    this._logger.debug("core", this.$$useRouters.name, "app routers initialization completed.");
-    this._logger.debug("core", this.$$useRouters.name, "-----------------------");
+    this.$logger.debug("core", this.$$useRouters.name, "app routers initialization completed.");
+    this.$logger.debug("core", this.$$useRouters.name, "-----------------------");
     const { routes, allowedMethods } = mainRouter;
     this.use(routes.bind(mainRouter));
     this.use(allowedMethods.bind(mainRouter));
@@ -555,7 +559,7 @@ export class BonbonsServer implements IServer {
     if (!path) return;
     const { list: pipelist } = pipes;
     const { list: mdsList } = mds;
-    this._logger.trace("core", this.$$resolveControllerMethod.name,
+    this.$logger.trace("core", this.$$resolveControllerMethod.name,
       `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "-")} ]`);
     const middlewares: KOAMiddleware[] = [...(mdsList || [])];
     this.$$addPipeMiddlewares(pipelist, middlewares);
@@ -573,27 +577,27 @@ export class BonbonsServer implements IServer {
   private $$addPipeMiddlewares(pipelist: BonbonsPipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
-      const instance = createPipeInstance(bundle, this._di.resolveDeps(pipe) || [], getRequestContext(ctx));
+      const instance = createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
       return instance.process(next);
     }));
   }
 
   private $$useMiddlewares(): void {
-    this._mwares.forEach(([fac, args]) => this._app.use(fac(...(args || []))));
+    this._mwares.forEach(([fac, args]) => this.$app.use(fac(...(args || []))));
   }
 
   private $$selectFormParser(route: IRoute, middlewares: any[]): void {
-    if (route.form && route.form.parser) resolveFormParser(middlewares, route, this._configs);
+    if (route.form && route.form.parser) resolveFormParser(middlewares, route, this.$confColls);
   }
 
   private $$decideFinalStep(route: IRoute, middlewares: KOAMiddleware[], constructor: any, methodName: string): void {
     middlewares.push(async (ctx) => {
-      const list = this._di.resolveDeps(constructor);
+      const list = this.$di.resolveDeps(constructor);
       const c = new constructor(...list);
       c.$$ctx = getRequestContext(ctx);
-      c.$$injector = this._readonlyDI;
+      c.$$injector = this.$rdi;
       const result: IResult = constructor.prototype[methodName].bind(c)(...this.$$parseFuncParams(ctx, route));
-      await resolveResult(ctx, result, this._readonlyConfigs);
+      await resolveResult(ctx, result, this.$configs);
     });
   }
 
@@ -605,7 +609,7 @@ export class BonbonsServer implements IServer {
     if (route.form && route.form.index >= 0) {
       const { index } = route.form;
       const staticType = (route.funcParams || [])[index];
-      const resolver = this._configs.get(STATIC_TYPED_RESOLVER);
+      const resolver = this.$confColls.get(STATIC_TYPED_RESOLVER);
       querys[index] = !!(resolver && staticType && staticType.type) ?
         resolver.FromObject(ctx.request.body, staticType.type) :
         ctx.request.body;
