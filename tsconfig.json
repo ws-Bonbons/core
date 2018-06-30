@@ -8,7 +8,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "target": "es6",
-    "module": "es2015",
+    "module": "commonjs",
     "outDir": "./dist",
     "lib": [
       "es2016",
