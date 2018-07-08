@@ -15,14 +15,7 @@ The core features are under development. Currently, the dependency injection sys
 
 ## Installation
 ```powershell
-# npm install @bonbons/core --save
-# npm install @bonbons/controllers --save
-# npm install @bonbons/decorators --save
-# npm install @bonbons/plugins --save
-# npm install @bonbons/di --save
-# npm install @bonbons/options --save
-# npm install @bonbons/utils --save
-# npm install @bonbons/contracts --save
+$ npm install @bonbons/core --save
 ```
 
 ## How it works?
