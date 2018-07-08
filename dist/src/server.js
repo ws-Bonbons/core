@@ -25,7 +25,7 @@ exports.BaseApp = BaseApp;
 class BonbonsServer {
     constructor(config) {
         this.$app = new contracts_1.KOA();
-        this.$confColls = new di_1.ConfigCollection();
+        this.$confColls = new di_1.PrivateAPI.ConfigCollection();
         this.$port = 3000;
         this.$is_dev = true;
         this._ctlrs = [];
@@ -169,7 +169,7 @@ class BonbonsServer {
         this.option(di_1.ENV_MODE, options_1.Options.env);
         this.option(di_1.DEPLOY_MODE, options_1.Options.deploy);
         this.option(di_1.CONFIG_COLLECTION, this.$confColls);
-        this.option(di_1.DI_CONTAINER, new di_1.DIContainer());
+        this.option(di_1.DI_CONTAINER, new di_1.PrivateAPI.DIContainer());
         this.option(plugins_1.FILE_LOADER, plugins_1.defaultFileLoaderOptions);
         this.option(plugins_1.TPL_RENDER_COMPILER, plugins_1.defaultTplRenderCompilerOptions);
         this.option(plugins_1.ERROR_HANDLER, plugins_1.defaultErrorHandler);
