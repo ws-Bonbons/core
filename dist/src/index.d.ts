@@ -1,10 +1,10 @@
-import * as Metadata from "@bonbons/contracts";
-import * as DISystem from "@bonbons/di";
-import * as DefaultOptions from "@bonbons/options";
-import * as PipeSupport from "@bonbons/pipes";
-import * as ControllerSupport from "@bonbons/controllers";
-import * as DecoratorSupport from "@bonbons/decorators";
-import * as BonbonsPlugins from "@bonbons/plugins";
+export * from "@bonbons/contracts";
+export * from "@bonbons/di";
+export * from "@bonbons/options";
+export * from "@bonbons/pipes";
+export * from "@bonbons/controllers";
+export * from "@bonbons/decorators";
+export * from "@bonbons/plugins";
 import { BonbonsServer, BaseApp } from "./server";
 /**
  * Bonbons
@@ -15,6 +15,4 @@ import { BonbonsServer, BaseApp } from "./server";
  */
 export declare const Bonbons: typeof BonbonsServer;
 export * from "./decorator";
-export declare type BonbonsScopeType = typeof Metadata & typeof BonbonsPlugins & typeof DISystem & typeof DefaultOptions & typeof PipeSupport & typeof ControllerSupport & typeof DecoratorSupport;
-export declare const BonbonsScope: BonbonsScopeType;
 export { BaseApp, BonbonsServer as Server };
