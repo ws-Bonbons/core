@@ -24,15 +24,15 @@ class BaseApp {
 exports.BaseApp = BaseApp;
 class BonbonsServer {
     constructor(config) {
-        this._app = new contracts_1.KOA();
+        this.$app = new contracts_1.KOA();
+        this.$confColls = new di_1.ConfigCollection();
+        this.$port = 3000;
+        this.$is_dev = true;
         this._ctlrs = [];
-        this._configs = new di_1.ConfigCollection();
         this._mwares = [];
         this._pipes = [];
-        this._scoped = [];
-        this._singleton = [];
-        this._port = 3000;
-        this._isDev = true;
+        this._scopeds = [];
+        this._singletons = [];
         this.$$defaultOptionsInitialization();
         this.$$configsInitialization(config);
     }
@@ -63,11 +63,11 @@ class BonbonsServer {
             throw utils_1.invalidOperation("DI token or entry is empty, you shouldn't call BonbonsServer.use<T>(...) without any param.");
         }
         if (!e2 || args.length === 2) {
-            this._configs.set(e1, optionAssign(this._configs, e1, e2));
+            this.$confColls.set(e1, optionAssign(this.$confColls, e1, e2));
         }
         else {
             const { token, value } = e1;
-            this._configs.set(token, optionAssign(this._configs, token, value));
+            this.$confColls.set(token, optionAssign(this.$confColls, token, value));
         }
         return this;
     }
@@ -96,7 +96,7 @@ class BonbonsServer {
         return this.$$preInject(args[0], args[1], contracts_1.InjectScope.Singleton);
     }
     getConfigs() {
-        return this._configs.get(di_1.CONFIG_COLLECTION);
+        return this.$confColls.get(di_1.CONFIG_COLLECTION);
     }
     /**
      * Start application
@@ -114,35 +114,35 @@ class BonbonsServer {
         this.$$preparePipes();
         this.$$useRouters();
         this.$$useMiddlewares();
-        this._app.listen(this._port);
+        this.$app.listen(this.$port);
         this.$$afterRun();
         if (run) {
-            run(this._readonlyConfigs);
+            run(this.$configs);
         }
-        if (!this._isDev) {
+        if (!this.$is_dev) {
             this._clearServer();
         }
         // console.log(this._configs);
     }
     $$afterRun() {
-        const { compilerFactory: factory } = this._configs.get(plugins_1.TPL_RENDER_COMPILER);
-        this.option(plugins_1.TPL_RENDER_COMPILER, { compiler: factory && factory(this._readonlyConfigs) });
+        const { compilerFactory: factory } = this.$confColls.get(plugins_1.TPL_RENDER_COMPILER);
+        this.option(plugins_1.TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
     }
     _clearServer() {
-        delete this._app;
+        delete this.$app;
+        delete this.$port;
         delete this._ctlrs;
         delete this._mwares;
         delete this._pipes;
-        delete this._scoped;
-        delete this._singleton;
-        delete this._port;
+        delete this._scopeds;
+        delete this._singletons;
         delete this._clearServer;
     }
     $$configsInitialization(config) {
         if (config) {
             this._ctlrs = config.controller || [];
-            resolveInjections(this._scoped, config.scoped || []);
-            resolveInjections(this._singleton, config.singleton || []);
+            resolveInjections(this._scopeds, config.scoped || []);
+            resolveInjections(this._singletons, config.singleton || []);
             this._pipes.push(...(config.pipes || []));
             (config.middlewares || []).forEach(item => {
                 if (item instanceof Array) {
@@ -166,9 +166,9 @@ class BonbonsServer {
         }
     }
     $$defaultOptionsInitialization() {
-        this.option(di_1.ENV_MODE, { mode: "development", trace: true });
-        this.option(di_1.DEPLOY_MODE, { port: 3000 });
-        this.option(di_1.CONFIG_COLLECTION, this._configs);
+        this.option(di_1.ENV_MODE, options_1.Options.env);
+        this.option(di_1.DEPLOY_MODE, options_1.Options.deploy);
+        this.option(di_1.CONFIG_COLLECTION, this.$confColls);
         this.option(di_1.DI_CONTAINER, new di_1.DIContainer());
         this.option(plugins_1.FILE_LOADER, plugins_1.defaultFileLoaderOptions);
         this.option(plugins_1.TPL_RENDER_COMPILER, plugins_1.defaultTplRenderCompilerOptions);
@@ -180,75 +180,75 @@ class BonbonsServer {
         this.option(di_1.STATIC_TYPED_RESOLVER, utils_1.TypedSerializer);
         this.option(di_1.JSON_RESULT_OPTIONS, options_1.Options.jsonResult);
         this.option(di_1.STRING_RESULT_OPTIONS, options_1.Options.stringResult);
-        this.option(di_1.BODY_PARSE_OPTIONS, { enableTypes: ["json", "form"] });
-        this.option(di_1.JSON_FORM_OPTIONS, { jsonLimit: "1mb" });
-        this.option(di_1.TEXT_FORM_OPTIONS, { textLimit: "1mb" });
-        this.option(di_1.URL_FORM_OPTIONS, { formLimit: "56kb" });
+        this.option(di_1.BODY_PARSE_OPTIONS, options_1.Options.koaBodyParser);
+        this.option(di_1.JSON_FORM_OPTIONS, options_1.Options.jsonForm);
+        this.option(di_1.TEXT_FORM_OPTIONS, options_1.Options.textForm);
+        this.option(di_1.URL_FORM_OPTIONS, options_1.Options.urlForm);
     }
     $$useCommonOptions() {
-        const { mode } = this._configs.get(di_1.ENV_MODE);
-        this._isDev = mode === "development";
-        const { port } = this._configs.get(di_1.DEPLOY_MODE);
-        this._port = port || 3000;
-        this._readonlyConfigs = { get: this._configs.get.bind(this._configs) };
-        this.singleton(plugins_1.ConfigService, () => this._readonlyConfigs);
-        this.singleton(plugins_1.RenderService, () => new plugins_1.BonbonsRender(this._readonlyConfigs));
-        const handler = this._configs.get(plugins_1.ERROR_HANDLER);
-        this._mwares.unshift([handler, [this._readonlyConfigs]]);
+        const { mode } = this.$confColls.get(di_1.ENV_MODE);
+        this.$is_dev = mode === "development";
+        const { port } = this.$confColls.get(di_1.DEPLOY_MODE);
+        this.$port = port || 3000;
+        this.$configs = { get: this.$confColls.get.bind(this.$confColls) };
+        this.singleton(plugins_1.ConfigService, () => this.$configs);
+        this.singleton(plugins_1.RenderService, () => new plugins_1.BonbonsRender(this.$configs));
+        const handler = this.$confColls.get(plugins_1.ERROR_HANDLER);
+        this._mwares.unshift([handler, [this.$configs]]);
     }
     $$initLogger() {
-        const Logger = decorators_1.Injectable()(this._configs.get(plugins_1.GLOBAL_LOGGER));
-        const env = this._configs.get(di_1.ENV_MODE);
-        this._logger = new Logger(env);
-        this.singleton(plugins_1.GlobalLogger, () => this._logger);
-        this._logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(Logger.name)} ].`);
-        this._logger.debug("core", this.$$initLogger.name, "-----------------------");
+        const Logger = decorators_1.Injectable()(this.$confColls.get(plugins_1.GLOBAL_LOGGER));
+        const env = this.$confColls.get(di_1.ENV_MODE);
+        this.$logger = new Logger(env);
+        this.singleton(plugins_1.GlobalLogger, () => this.$logger);
+        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(Logger.name)} ].`);
+        this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
     }
     $$initDLookup() {
-        this._di = this._configs.get(di_1.DI_CONTAINER);
-        this._readonlyDI = { get: this._di.get.bind(this._di) };
-        this.singleton(plugins_1.InjectService, () => this._readonlyDI);
+        this.$di = this.$confColls.get(di_1.DI_CONTAINER);
+        this.$rdi = { get: this.$di.get.bind(this.$di) };
+        this.singleton(plugins_1.InjectService, () => this.$rdi);
     }
     $$initDIContainer() {
-        this._logger.debug("core", this.$$initDIContainer.name, "init DI container.");
-        this._logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scoped.length)} ].`);
-        this._scoped.forEach(([tk, imp]) => {
+        this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
+        this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
+        this._scopeds.forEach(([tk, imp]) => {
             this.$$injectaFinally(tk, imp, contracts_1.InjectScope.Scoped);
-            this._logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
+            this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
-        this._logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singleton.length)} ].`);
-        this._singleton.forEach(([tk, imp]) => {
+        this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
+        this._singletons.forEach(([tk, imp]) => {
             this.$$injectaFinally(tk, imp, contracts_1.InjectScope.Singleton);
-            this._logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
+            this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
-        this._di.complete();
-        this._logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this._di.count)} ].`);
-        this._logger.debug("core", this.$$initDIContainer.name, "-----------------------");
+        this.$di.complete();
+        this.$logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
+        this.$logger.debug("core", this.$$initDIContainer.name, "-----------------------");
     }
     $$preInject(provide, classType, type) {
         if (!provide)
             return this;
         type = type || contracts_1.InjectScope.Singleton;
         type === contracts_1.InjectScope.Scoped ?
-            this._scoped.push([provide, classType || provide]) :
-            this._singleton.push([provide, classType || provide]);
+            this._scopeds.push([provide, classType || provide]) :
+            this._singletons.push([provide, classType || provide]);
         return this;
     }
     $$injectaFinally(provide, classType, type) {
         if (!provide)
             return this;
         type = type || contracts_1.InjectScope.Singleton;
-        this._di.register(provide, classType || provide, type);
+        this.$di.register(provide, classType || provide, type);
         return this;
     }
     $$useRouters() {
-        this._logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
+        this.$logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
         const mainRouter = new contracts_1.KOARouter();
         this._ctlrs.forEach(controllerClass => {
             const proto = controllerClass.prototype;
             const { router } = (proto.getConfig && proto.getConfig());
             const thisRouter = new contracts_1.KOARouter({ prefix: router.prefix });
-            this._logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${plugins_1.COLORS.green}${Object.keys(router.routes).length}${plugins_1.COLORS.reset} ]`);
+            this.$logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${plugins_1.COLORS.green}${Object.keys(router.routes).length}${plugins_1.COLORS.reset} ]`);
             Object.keys(router.routes).forEach(methodName => {
                 const item = router.routes[methodName];
                 const { allowMethods } = item;
@@ -258,8 +258,8 @@ class BonbonsServer {
             });
             mainRouter.use(thisRouter.routes()).use(thisRouter.allowedMethods());
         });
-        this._logger.debug("core", this.$$useRouters.name, "app routers initialization completed.");
-        this._logger.debug("core", this.$$useRouters.name, "-----------------------");
+        this.$logger.debug("core", this.$$useRouters.name, "app routers initialization completed.");
+        this.$logger.debug("core", this.$$useRouters.name, "-----------------------");
         const { routes, allowedMethods } = mainRouter;
         this.use(routes.bind(mainRouter));
         this.use(allowedMethods.bind(mainRouter));
@@ -270,7 +270,7 @@ class BonbonsServer {
             return;
         const { list: pipelist } = pipes;
         const { list: mdsList } = mds;
-        this._logger.trace("core", this.$$resolveControllerMethod.name, `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "-")} ]`);
+        this.$logger.trace("core", this.$$resolveControllerMethod.name, `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "-")} ]`);
         const middlewares = [...(mdsList || [])];
         this.$$addPipeMiddlewares(pipelist, middlewares);
         this.$$selectFormParser(item, middlewares);
@@ -285,25 +285,25 @@ class BonbonsServer {
     $$addPipeMiddlewares(pipelist, middlewares) {
         resolvePipeList(pipelist).forEach(bundle => middlewares.push((ctx, next) => __awaiter(this, void 0, void 0, function* () {
             const { target: pipe } = bundle;
-            const instance = pipes_1.createPipeInstance(bundle, this._di.resolveDeps(pipe) || [], getRequestContext(ctx));
+            const instance = pipes_1.createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
             return instance.process(next);
         })));
     }
     $$useMiddlewares() {
-        this._mwares.forEach(([fac, args]) => this._app.use(fac(...(args || []))));
+        this._mwares.forEach(([fac, args]) => this.$app.use(fac(...(args || []))));
     }
     $$selectFormParser(route, middlewares) {
         if (route.form && route.form.parser)
-            resolveFormParser(middlewares, route, this._configs);
+            resolveFormParser(middlewares, route, this.$confColls);
     }
     $$decideFinalStep(route, middlewares, constructor, methodName) {
         middlewares.push((ctx) => __awaiter(this, void 0, void 0, function* () {
-            const list = this._di.resolveDeps(constructor);
+            const list = this.$di.resolveDeps(constructor);
             const c = new constructor(...list);
             c.$$ctx = getRequestContext(ctx);
-            c.$$injector = this._readonlyDI;
+            c.$$injector = this.$rdi;
             const result = constructor.prototype[methodName].bind(c)(...this.$$parseFuncParams(ctx, route));
-            yield resolveResult(ctx, result, this._readonlyConfigs);
+            yield resolveResult(ctx, result, this.$configs);
         }));
     }
     $$parseFuncParams(ctx, route) {
@@ -314,7 +314,7 @@ class BonbonsServer {
         if (route.form && route.form.index >= 0) {
             const { index } = route.form;
             const staticType = (route.funcParams || [])[index];
-            const resolver = this._configs.get(di_1.STATIC_TYPED_RESOLVER);
+            const resolver = this.$confColls.get(di_1.STATIC_TYPED_RESOLVER);
             querys[index] = !!(resolver && staticType && staticType.type) ?
                 resolver.FromObject(ctx.request.body, staticType.type) :
                 ctx.request.body;

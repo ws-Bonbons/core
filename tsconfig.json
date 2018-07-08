@@ -1,18 +1,32 @@
 {
+  "extends": "./tsconfig.build",
   "compilerOptions": {
-    "sourceMap": true,
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "target": "es6",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "lib": [
-      "es2016",
-      "es2015"
-    ]
+    "baseUrl": "./",
+    "paths": {
+      "@bonbons/plugins": [
+        "./../plugins/index.ts"
+      ],
+      "@bonbons/di": [
+        "./../di/index.ts"
+      ],
+      "@bonbons/utils": [
+        "./../utils/index.ts"
+      ],
+      "@bonbons/contracts": [
+        "./../contracts/index.ts"
+      ],
+      "@bonbons/options": [
+        "./../options/index.ts"
+      ],
+      "@bonbons/pipes": [
+        "./../pipes/index.ts"
+      ],
+      "@bonbons/decorators": [
+        "./../decorators/index.ts"
+      ],
+      "@bonbons/controllers": [
+        "./../controllers/index.ts"
+      ]
+    }
   }
 }

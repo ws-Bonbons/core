@@ -1,11 +1,12 @@
 {
   "name": "@bonbons/core",
-  "version": "1.0.7-beta",
+  "version": "1.0.8",
   "description": "@bonbons/core",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "webpack --config webpack.config.js"
+    "build": "tsc -project tsconfig.build.json",
+    "build:package": "webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
@@ -18,14 +19,14 @@
   },
   "homepage": "https://github.com/ws-Bonbons/core#readme",
   "dependencies": {
-    "@bonbons/contracts": "^1.0.6-beta",
-    "@bonbons/controllers": "^1.0.6-beta",
-    "@bonbons/decorators": "^1.0.6-beta",
-    "@bonbons/di": "^1.0.6-beta",
-    "@bonbons/options": "^1.0.6-beta",
-    "@bonbons/pipes": "^1.0.6-beta",
-    "@bonbons/plugins": "^1.0.6-beta",
-    "@bonbons/utils": "^1.0.6-beta"
+    "@bonbons/contracts": "latest",
+    "@bonbons/controllers": "latest",
+    "@bonbons/decorators": "latest",
+    "@bonbons/di": "latest",
+    "@bonbons/options": "latest",
+    "@bonbons/pipes": "latest",
+    "@bonbons/plugins": "latest",
+    "@bonbons/utils": "latest"
   },
   "devDependencies": {
     "@types/koa": "^2.0.46",

@@ -18,19 +18,19 @@ export declare class BonbonsServer implements IServer {
      * @type {IDIContainer}
      * @memberof BonbonsServer
      */
-    private _di;
-    private _readonlyDI;
-    private _readonlyConfigs;
-    private _logger;
-    private _app;
+    private $di;
+    private $rdi;
+    private $configs;
+    private $logger;
+    private $app;
+    private $confColls;
+    private $port;
+    private $is_dev;
     private _ctlrs;
-    private _configs;
     private _mwares;
     private _pipes;
-    private _scoped;
-    private _singleton;
-    private _port;
-    private _isDev;
+    private _scopeds;
+    private _singletons;
     constructor(config?: BonbonsServerConfig);
     /**
      * Use koa middleware.
@@ -95,12 +95,12 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template T
-     * @param {IConstructor<T>} srv
+     * @template TInject
+     * @param {IConstructor<TInject>} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    scoped<T>(srv: IConstructor<T>): BonbonsServer;
+    scoped<TInject>(srv: IConstructor<TInject>): BonbonsServer;
     /**
      * Set a scoped servics
      * ---
@@ -113,14 +113,14 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template B
-     * @template T
-     * @param {InjectableToken<B>} token
-     * @param {ImplementToken<T>} srv
+     * @template TToken
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {ImplementToken<TImplement>} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    scoped<B, T>(token: InjectableToken<B>, srv: ImplementToken<T>): BonbonsServer;
+    scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
     /**
      * Set a scoped servics
      * ---
@@ -134,14 +134,14 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template B
-     * @template T
-     * @param {InjectableToken<B>} token
-     * @param {InjectFactory<T>} srv
+     * @template TToken
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {InjectFactory<TImplement>} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    scoped<B, T>(token: InjectableToken<B>, srv: InjectFactory<T>): BonbonsServer;
+    scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
     /**
      * Set a scoped servics
      * ---
@@ -157,13 +157,14 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template T
-     * @param {InjectableToken} token
-     * @param {T} srv
+     * @template TInject
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {TImplement} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    scoped<B, T>(token: InjectableToken<B>, srv: T): BonbonsServer;
+    scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
     /**
      * Set a singleton service
      * ---
@@ -174,12 +175,12 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template T
-     * @param {IConstructor<T>} srv
+     * @template TInject
+     * @param {IConstructor<TInject>} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    singleton<T>(srv: IConstructor<T>): BonbonsServer;
+    singleton<TInject>(srv: IConstructor<TInject>): BonbonsServer;
     /**
      * Set a singleton service
      * ---
@@ -193,14 +194,14 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template B
-     * @template T
-     * @param {InjectableToken<B>} token
-     * @param {ImplementToken<T>} srv
+     * @template TToken
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {ImplementToken<TImplement>} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    singleton<B, T>(token: InjectableToken<B>, srv: ImplementToken<T>): BonbonsServer;
+    singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
     /**
      * Set a singleton service
      * ---
@@ -214,14 +215,14 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template B
-     * @template T
+     * @template TToken
+     * @template TImplement
      * @param {InjectableToken<B>} token
-     * @param {InjectFactory<T>} srv
+     * @param {InjectFactory<TImplement>} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    singleton<B, T>(token: InjectableToken<B>, srv: InjectFactory<T>): BonbonsServer;
+    singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
     /**
      * Set a singleton service
      * ---
@@ -235,13 +236,14 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @author Big Mogician
-     * @template T
-     * @param {InjectableToken} token
-     * @param {T} srv
+     * @template TToken
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {TImplement} srv
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    singleton<B, T>(token: InjectableToken<B>, srv: T): BonbonsServer;
+    singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
     getConfigs(): IConfigs;
     /**
      * Start application
