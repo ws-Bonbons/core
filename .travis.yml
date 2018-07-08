@@ -8,4 +8,4 @@ before_script:
   - npm install
   - npm install typescript@2.9.1 -g
 script:
-  - tsc
+  - npm run build
