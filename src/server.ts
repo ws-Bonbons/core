@@ -36,9 +36,8 @@ import {
   IPipeBundle
 } from "@bonbons/contracts";
 import {
-  DIContainer,
+  PrivateAPI,
   CONFIG_COLLECTION,
-  ConfigCollection,
   DI_CONTAINER,
   JSON_RESULT_OPTIONS,
   STATIC_TYPED_RESOLVER,
@@ -109,7 +108,7 @@ export class BonbonsServer implements IServer {
   private $logger!: GlobalLogger;
 
   private $app = new KOA();
-  private $confColls: IConfigs = new ConfigCollection();
+  private $confColls: IConfigs = new PrivateAPI.ConfigCollection();
 
   private $port = 3000;
   private $is_dev = true;
@@ -449,7 +448,7 @@ export class BonbonsServer implements IServer {
     this.option(ENV_MODE, DEFAULTS.env);
     this.option(DEPLOY_MODE, DEFAULTS.deploy);
     this.option(CONFIG_COLLECTION, this.$confColls);
-    this.option(DI_CONTAINER, new DIContainer());
+    this.option(DI_CONTAINER, new PrivateAPI.DIContainer());
     this.option(FILE_LOADER, defaultFileLoaderOptions);
     this.option(TPL_RENDER_COMPILER, defaultTplRenderCompilerOptions);
     this.option(ERROR_HANDLER, defaultErrorHandler);
