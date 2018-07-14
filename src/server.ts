@@ -19,11 +19,9 @@ import { invalidOperation, invalidParam, TypeCheck, TypedSerializer } from "@bon
 import { Context } from "@bonbons/controllers";
 import { Options as DEFAULTS } from "@bonbons/options";
 import {
+  Logger,
   GLOBAL_LOGGER,
-  BonbonsLogger,
-  GlobalLogger,
-  COLORS,
-  ColorsHelper,
+  PluginsAPI as g,
   InjectService,
   ConfigService,
   ERROR_HANDLER,
@@ -42,9 +40,10 @@ import {
   defaultFileLoaderOptions
 } from "@bonbons/plugins";
 import { Injectable } from "@bonbons/decorators";
-import { createPipeInstance } from "@bonbons/pipes";
+import { PipeAPI as p } from "@bonbons/pipes";
 
-const { green, cyan, red, blue, magenta, yellow } = ColorsHelper;
+const { green, cyan, red, blue, magenta, yellow } = g.ColorsHelper;
+const { COLORS } = g;
 const {
   InjectScope,
   KOA,
@@ -81,7 +80,7 @@ type KOABodyParseOptions = c.KOABodyParseOptions;
 type IPipeBundle<T> = c.IPipeBundle<T>;
 
 export abstract class BaseApp {
-  protected readonly logger: GlobalLogger;
+  protected readonly logger: Logger;
   protected get config(): ConfigsCollection { return this["_configs"]; }
   public start(): void { }
 }
@@ -105,7 +104,7 @@ export class BonbonsServer implements IServer {
   private $di!: SourceDI;
   private $rdi!: DIContainer;
   private $configs!: ConfigsCollection;
-  private $logger!: GlobalLogger;
+  private $logger!: Logger;
 
   private $app = new KOA();
   private $confColls: SourceConfigs = new di.ConfigCollection();
@@ -153,11 +152,11 @@ export class BonbonsServer implements IServer {
    * @description
    * @author Big Mogician
    * @template T
-   * @param {BonbonsEntry<Partial<T>>} entry BonbonsEntry<T>
+   * @param {BonbonsEntry<Partial<T>|T>} entry BonbonsEntry<T>
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public option<T>(entry: Entry<Partial<T>>): BonbonsServer;
+  public option<T>(entry: Entry<Partial<T> | T>): BonbonsServer;
   /**
    * Set an option
    * ---
@@ -171,7 +170,7 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public option<T>(token: Token<T>, value: Partial<T>): BonbonsServer;
+  public option<T>(token: Token<T>, value: Partial<T> | T): BonbonsServer;
   public option(...args: any[]): BonbonsServer {
     const [e1, e2] = args;
     if (!e1) {
@@ -199,7 +198,7 @@ export class BonbonsServer implements IServer {
    * @memberof BonbonsServer
    */
   public controller<T>(ctlr: Constructor<T>): BonbonsServer {
-    if (!ctlr || !(<Constructor<T>>ctlr).prototype.__valid) throw controllerError(ctlr);
+    if (!ctlr || !(<c.IBonbonsController>ctlr.prototype).__valid) throw controllerError(ctlr);
     this._ctlrs.push(ctlr);
     return this;
   }
@@ -455,7 +454,7 @@ export class BonbonsServer implements IServer {
     this.option(ERROR_PAGE_TEMPLATE, defaultErrorPageTemplate);
     this.option(ERROR_RENDER_OPRIONS, defaultErrorPageRenderOptions);
     this.option(TPL_RENDER_OPTIONS, defaultViewTplRenderOptions);
-    this.option(GLOBAL_LOGGER, BonbonsLogger);
+    this.option(GLOBAL_LOGGER, g.BonbonsLogger);
     this.option(STATIC_TYPED_RESOLVER, TypedSerializer);
     this.option(JSON_RESULT_OPTIONS, DEFAULTS.jsonResult);
     this.option(STRING_RESULT_OPTIONS, DEFAULTS.stringResult);
@@ -478,10 +477,10 @@ export class BonbonsServer implements IServer {
   }
 
   private $$initLogger(): void {
-    const Logger = Injectable()(this.$confColls.get(GLOBAL_LOGGER));
+    const LoggerConstructor = Injectable()(this.$confColls.get(GLOBAL_LOGGER));
     const env = this.$confColls.get(ENV_MODE);
-    this.$logger = new Logger(env);
-    this.singleton(GlobalLogger, () => this.$logger);
+    this.$logger = new LoggerConstructor(env);
+    this.singleton(Logger, () => this.$logger);
     this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(Logger.name)} ].`);
     this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
   }
@@ -559,7 +558,7 @@ export class BonbonsServer implements IServer {
     const { list: pipelist } = pipes;
     const { list: mdsList } = mds;
     this.$logger.trace("core", this.$$resolveControllerMethod.name,
-      `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "-")} ]`);
+      `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
     const middlewares: KOAMiddleware[] = [...(mdsList || [])];
     this.$$addPipeMiddlewares(pipelist, middlewares);
     this.$$selectFormParser(item, middlewares);
@@ -576,7 +575,7 @@ export class BonbonsServer implements IServer {
   private $$addPipeMiddlewares(pipelist: PipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
-      const instance = createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
+      const instance = p.createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
       return instance.process(next);
     }));
   }

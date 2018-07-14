@@ -16,7 +16,8 @@ const options_1 = require("@bonbons/options");
 const plugins_1 = require("@bonbons/plugins");
 const decorators_1 = require("@bonbons/decorators");
 const pipes_1 = require("@bonbons/pipes");
-const { green, cyan, red, blue, magenta, yellow } = plugins_1.ColorsHelper;
+const { green, cyan, red, blue, magenta, yellow } = plugins_1.PluginsAPI.ColorsHelper;
+const { COLORS } = plugins_1.PluginsAPI;
 const { InjectScope, KOA, KOARouter, KOABodyParser, FormType } = contracts_1.Contracts;
 class BaseApp {
     get config() { return this["_configs"]; }
@@ -177,7 +178,7 @@ class BonbonsServer {
         this.option(plugins_1.ERROR_PAGE_TEMPLATE, plugins_1.defaultErrorPageTemplate);
         this.option(plugins_1.ERROR_RENDER_OPRIONS, plugins_1.defaultErrorPageRenderOptions);
         this.option(plugins_1.TPL_RENDER_OPTIONS, plugins_1.defaultViewTplRenderOptions);
-        this.option(plugins_1.GLOBAL_LOGGER, plugins_1.BonbonsLogger);
+        this.option(plugins_1.GLOBAL_LOGGER, plugins_1.PluginsAPI.BonbonsLogger);
         this.option(di_1.STATIC_TYPED_RESOLVER, utils_1.TypedSerializer);
         this.option(di_1.JSON_RESULT_OPTIONS, options_1.Options.jsonResult);
         this.option(di_1.STRING_RESULT_OPTIONS, options_1.Options.stringResult);
@@ -198,11 +199,11 @@ class BonbonsServer {
         this._mwares.unshift([handler, [this.$configs]]);
     }
     $$initLogger() {
-        const Logger = decorators_1.Injectable()(this.$confColls.get(plugins_1.GLOBAL_LOGGER));
+        const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(plugins_1.GLOBAL_LOGGER));
         const env = this.$confColls.get(di_1.ENV_MODE);
-        this.$logger = new Logger(env);
-        this.singleton(plugins_1.GlobalLogger, () => this.$logger);
-        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(Logger.name)} ].`);
+        this.$logger = new LoggerConstructor(env);
+        this.singleton(plugins_1.Logger, () => this.$logger);
+        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(plugins_1.Logger.name)} ].`);
         this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
     }
     $$initDLookup() {
@@ -249,7 +250,7 @@ class BonbonsServer {
             const proto = controllerClass.prototype;
             const { router } = (proto.getConfig && proto.getConfig());
             const thisRouter = new KOARouter({ prefix: router.prefix });
-            this.$logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${plugins_1.COLORS.green}${Object.keys(router.routes).length}${plugins_1.COLORS.reset} ]`);
+            this.$logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${COLORS.green}${Object.keys(router.routes).length}${COLORS.reset} ]`);
             Object.keys(router.routes).forEach(methodName => {
                 const item = router.routes[methodName];
                 const { allowMethods } = item;
@@ -271,7 +272,7 @@ class BonbonsServer {
             return;
         const { list: pipelist } = pipes;
         const { list: mdsList } = mds;
-        this.$logger.trace("core", this.$$resolveControllerMethod.name, `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "-")} ]`);
+        this.$logger.trace("core", this.$$resolveControllerMethod.name, `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
         const middlewares = [...(mdsList || [])];
         this.$$addPipeMiddlewares(pipelist, middlewares);
         this.$$selectFormParser(item, middlewares);
@@ -286,7 +287,7 @@ class BonbonsServer {
     $$addPipeMiddlewares(pipelist, middlewares) {
         resolvePipeList(pipelist).forEach(bundle => middlewares.push((ctx, next) => __awaiter(this, void 0, void 0, function* () {
             const { target: pipe } = bundle;
-            const instance = pipes_1.createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
+            const instance = pipes_1.PipeAPI.createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
             return instance.process(next);
         })));
     }

@@ -1,6 +1,6 @@
 import { Contracts as c, Constructor } from "@bonbons/contracts";
 import { ConfigsCollection } from "@bonbons/di";
-import { GlobalLogger } from "@bonbons/plugins";
+import { Logger } from "@bonbons/plugins";
 declare type IJTK<T> = c.InjectableToken<T>;
 declare type IJTFC<T> = c.BonbonsDeptFactory<T>;
 declare type IMPK<T> = c.ImplementToken<T>;
@@ -11,7 +11,7 @@ declare type MiddlewaresFactory = c.MiddlewaresFactory;
 declare type ServerConfig = c.BonbonsServerConfig;
 declare type PipeEntry = c.BonbonsPipeEntry;
 export declare abstract class BaseApp {
-    protected readonly logger: GlobalLogger;
+    protected readonly logger: Logger;
     protected readonly config: ConfigsCollection;
     start(): void;
 }
@@ -63,11 +63,11 @@ export declare class BonbonsServer implements IServer {
      * @description
      * @author Big Mogician
      * @template T
-     * @param {BonbonsEntry<Partial<T>>} entry BonbonsEntry<T>
+     * @param {BonbonsEntry<Partial<T>|T>} entry BonbonsEntry<T>
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    option<T>(entry: Entry<Partial<T>>): BonbonsServer;
+    option<T>(entry: Entry<Partial<T> | T>): BonbonsServer;
     /**
      * Set an option
      * ---
@@ -81,7 +81,7 @@ export declare class BonbonsServer implements IServer {
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    option<T>(token: Token<T>, value: Partial<T>): BonbonsServer;
+    option<T>(token: Token<T>, value: Partial<T> | T): BonbonsServer;
     /**
      * Set a controller
      * ---

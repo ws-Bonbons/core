@@ -18,14 +18,20 @@
       "@bonbons/plugins": [
         "./../plugins/index.ts"
       ],
+      "@bonbons/plugins/dist/src/public-api": [
+        "./../plugins/src/public-api.ts"
+      ],
+      "@bonbons/pipes": [
+        "./../pipes/index.ts"
+      ],
+      "@bonbons/pipes/dist/src/public-api": [
+        "./../pipes/src/public-api.ts"
+      ],
       "@bonbons/utils": [
         "./../utils/index.ts"
       ],
       "@bonbons/options": [
         "./../options/index.ts"
-      ],
-      "@bonbons/pipes": [
-        "./../pipes/index.ts"
       ],
       "@bonbons/decorators": [
         "./../decorators/index.ts"

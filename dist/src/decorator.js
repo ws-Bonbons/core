@@ -19,10 +19,11 @@ function BonbonsApp(config) {
             const app = new server_1.BonbonsServer(config);
             app.start();
             const conf = app.getConfigs();
-            this._configs = { get: conf.get.bind(conf) };
-            const di = this._configs.get(di_1.DI_CONTAINER);
-            this.logger = di.get(plugins_1.GlobalLogger);
-            theStartup && theStartup.bind(this)();
+            const instance = this;
+            instance._configs = { get: conf.get.bind(conf) };
+            const di = instance._configs.get(di_1.DI_CONTAINER);
+            instance.logger = di.get(plugins_1.Logger);
+            theStartup && theStartup.bind(instance)();
         };
     };
 }

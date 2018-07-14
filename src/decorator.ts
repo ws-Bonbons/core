@@ -1,6 +1,6 @@
 import { Constructor, Contracts as c } from "@bonbons/contracts";
 import { BonbonsServer, BaseApp } from "./server";
-import { GlobalLogger } from "@bonbons/plugins";
+import { Logger } from "@bonbons/plugins";
 import { DI_CONTAINER } from "@bonbons/di";
 
 /**
@@ -19,10 +19,11 @@ export function BonbonsApp(config: c.BonbonsServerConfig) {
       const app = new BonbonsServer(config);
       app.start();
       const conf = app.getConfigs();
-      this._configs = { get: conf.get.bind(conf) };
-      const di = this._configs.get(DI_CONTAINER);
-      this.logger = di.get(GlobalLogger);
-      theStartup && theStartup.bind(this)();
+      const instance: any = this;
+      instance._configs = { get: conf.get.bind(conf) };
+      const di = instance._configs.get(DI_CONTAINER);
+      instance.logger = di.get(Logger);
+      theStartup && theStartup.bind(instance)();
     };
   };
 }

@@ -4,11 +4,11 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("@bonbons/di/dist/src/public-api"));
+__export(require("@bonbons/pipes/dist/src/public-api"));
+__export(require("@bonbons/plugins/dist/src/public-api"));
 __export(require("@bonbons/options"));
-__export(require("@bonbons/pipes"));
 __export(require("@bonbons/controllers"));
 __export(require("@bonbons/decorators"));
-__export(require("@bonbons/plugins"));
 const server_1 = require("./server");
 exports.Server = server_1.BonbonsServer;
 exports.BaseApp = server_1.BaseApp;
