@@ -696,11 +696,11 @@ function resolveParser(type: FormType, configs: ConfigsCollection, options?: Bas
   }
 }
 
-function resolveParserOptions<T>(key: Token<T>, configs: ConfigsCollection, options: BaseFormOptions): KOAMiddleware {
+function resolveParserOptions<T>(key: Token<T>, configs: ConfigsCollection, options: Partial<BaseFormOptions>): KOAMiddleware {
   // console.log(options);
   const { type, extends: extendsV } = options;
   (<any>options).enableTypes = [type];
-  const etx = (<KOABodyParseOptions>options).extendTypes = {};
+  const etx = (<Partial<KOABodyParseOptions>>options).extendTypes = {};
   etx[(<string>type)] = extendsV || [];
   delete options.type;
   delete options.extends;
