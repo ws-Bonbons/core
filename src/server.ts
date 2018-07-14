@@ -153,11 +153,11 @@ export class BonbonsServer implements IServer {
    * @description
    * @author Big Mogician
    * @template T
-   * @param {BonbonsEntry<T>} entry BonbonsEntry<T>
+   * @param {BonbonsEntry<Partial<T>>} entry BonbonsEntry<T>
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public option<T>(entry: Entry<T>): BonbonsServer;
+  public option<T>(entry: Entry<Partial<T>>): BonbonsServer;
   /**
    * Set an option
    * ---
@@ -167,11 +167,11 @@ export class BonbonsServer implements IServer {
    * @author Big Mogician
    * @template T
    * @param {Token<T>} token
-   * @param {T} value
+   * @param {Partial<T>} value
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public option<T>(token: Token<T>, value: T): BonbonsServer;
+  public option<T>(token: Token<T>, value: Partial<T>): BonbonsServer;
   public option(...args: any[]): BonbonsServer {
     const [e1, e2] = args;
     if (!e1) {
