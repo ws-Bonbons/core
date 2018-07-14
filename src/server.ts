@@ -1,33 +1,8 @@
-import {
-  Contracts,
-  IBonbonsServer as IServer,
-  MiddlewaresFactory,
-  BonbonsServerConfig,
-  BonbonsInjectEntry,
-  KOAMiddlewareTuple,
-  InjectableServiceType,
-  BonbonsPipeEntry,
-  IRoute,
-  UnionBonbonsResult as IResult,
-  IBonbonsControllerMetadata as ControllerMetadata,
-  IBonbonsMethodResult as SyncResult,
-  IMethodResult,
-  KOAMiddleware,
-  KOA,
-  KOAContext,
-  KOARouter,
-  KOABodyParser,
-  KOABodyParseOptions,
-  FormType,
-  IConstructor,
-  Async,
-  BaseFormOptions,
-  IPipeBundle
-} from "@bonbons/contracts";
+import { Contracts as c, Constructor, Async, BaseFormOptions } from "@bonbons/contracts";
 import {
   ConfigsCollection,
   DIContainer,
-  PrivateAPI as di,
+  PrivateDI as di,
   CONFIG_COLLECTION,
   DI_CONTAINER,
   JSON_RESULT_OPTIONS,
@@ -38,8 +13,7 @@ import {
   TEXT_FORM_OPTIONS,
   URL_FORM_OPTIONS,
   ENV_MODE,
-  DEPLOY_MODE,
-  PrivateAPI
+  DEPLOY_MODE
 } from "@bonbons/di";
 import { invalidOperation, invalidParam, TypeCheck, TypedSerializer } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
@@ -71,16 +45,40 @@ import { Injectable } from "@bonbons/decorators";
 import { createPipeInstance } from "@bonbons/pipes";
 
 const { green, cyan, red, blue, magenta, yellow } = ColorsHelper;
-const { InjectScope } = Contracts;
-type InjectScope = Contracts.InjectScope;
-type SourceConfigs = Contracts.BonbonsConfigCollection;
-type SourceDI = Contracts.BonbonsDIContainer;
-type IJTK<T> = Contracts.InjectableToken<T>;
-type IJTFC<T> = Contracts.BonbonsDeptFactory<T>;
-type IMPK<T> = Contracts.ImplementToken<T>;
-type IMPDIV<T = any> = Contracts.ImplementDIValue<T>;
-type Entry<T> = Contracts.BonbonsEntry<T>;
-type Token<T> = Contracts.BonbonsToken<T>;
+const {
+  InjectScope,
+  KOA,
+  KOARouter,
+  KOABodyParser,
+  FormType
+} = c;
+type InjectScope = c.InjectScope;
+type SourceConfigs = c.BonbonsConfigCollection;
+type SourceDI = c.BonbonsDIContainer;
+type IJTK<T> = c.InjectableToken<T>;
+type IJTFC<T> = c.BonbonsDeptFactory<T>;
+type IMPK<T> = c.ImplementToken<T>;
+type IMPDIV<T = any> = c.ImplementDIValue<T>;
+type Entry<T> = c.BonbonsEntry<T>;
+type Token<T> = c.BonbonsToken<T>;
+type FormType = c.FormType;
+type IServer = c.IBonbonsServer;
+type MiddlewaresFactory = c.MiddlewaresFactory;
+type ServerConfig = c.BonbonsServerConfig;
+type InjectEntry<T> = c.BonbonsInjectEntry<T>;
+type MiddlewareTuple = c.KOAMiddlewareTuple;
+type InjectableType = c.InjectableServiceType;
+type PipeEntry = c.BonbonsPipeEntry;
+type IRoute = c.IRoute;
+type IResult = c.UnionBonbonsResult;
+type ControllerMetadata = c.IBonbonsControllerMetadata;
+type SyncResult = c.IBonbonsMethodResult;
+type IMethodResult = c.IMethodResult;
+type KOAMiddleware = c.KOAMiddleware;
+type KOAContext = c.KOAContext;
+type KOARouter = c.KOARouter;
+type KOABodyParseOptions = c.KOABodyParseOptions;
+type IPipeBundle<T> = c.IPipeBundle<T>;
 
 export abstract class BaseApp {
   protected readonly logger: GlobalLogger;
@@ -115,13 +113,13 @@ export class BonbonsServer implements IServer {
   private $port = 3000;
   private $is_dev = true;
 
-  private _ctlrs: IConstructor<any>[] = [];
-  private _mwares: KOAMiddlewareTuple[] = [];
-  private _pipes: BonbonsPipeEntry[] = [];
+  private _ctlrs: Constructor<any>[] = [];
+  private _mwares: MiddlewareTuple[] = [];
+  private _pipes: PipeEntry[] = [];
   private _scopeds: [IJTK<any>, IMPDIV][] = [];
   private _singletons: [IJTK<any>, IMPDIV][] = [];
 
-  constructor(config?: BonbonsServerConfig) {
+  constructor(config?: ServerConfig) {
     this.$$defaultOptionsInitialization();
     this.$$configsInitialization(config);
   }
@@ -142,7 +140,7 @@ export class BonbonsServer implements IServer {
     return this;
   }
 
-  public pipe(pipe: BonbonsPipeEntry): BonbonsServer {
+  public pipe(pipe: PipeEntry): BonbonsServer {
     this._pipes.push(pipe);
     return this;
   }
@@ -200,8 +198,8 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public controller<T>(ctlr: IConstructor<T>): BonbonsServer {
-    if (!ctlr || !(<IConstructor<T>>ctlr).prototype.__valid) throw controllerError(ctlr);
+  public controller<T>(ctlr: Constructor<T>): BonbonsServer {
+    if (!ctlr || !(<Constructor<T>>ctlr).prototype.__valid) throw controllerError(ctlr);
     this._ctlrs.push(ctlr);
     return this;
   }
@@ -217,11 +215,11 @@ export class BonbonsServer implements IServer {
    * @description
    * @author Big Mogician
    * @template TInject
-   * @param {IConstructor<TInject>} srv
+   * @param {Constructor<TInject>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<TInject>(srv: IConstructor<TInject>): BonbonsServer;
+  public scoped<TInject>(srv: Constructor<TInject>): BonbonsServer;
   /**
    * Set a scoped servics
    * ---
@@ -301,11 +299,11 @@ export class BonbonsServer implements IServer {
    * @description
    * @author Big Mogician
    * @template TInject
-   * @param {IConstructor<TInject>} srv
+   * @param {Constructor<TInject>} srv
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<TInject>(srv: IConstructor<TInject>): BonbonsServer;
+  public singleton<TInject>(srv: Constructor<TInject>): BonbonsServer;
   /**
    * Set a singleton service
    * ---
@@ -420,7 +418,7 @@ export class BonbonsServer implements IServer {
     delete this._clearServer;
   }
 
-  private $$configsInitialization(config?: BonbonsServerConfig): void {
+  private $$configsInitialization(config?: ServerConfig): void {
     if (config) {
       this._ctlrs = config.controller || [];
       resolveInjections(this._scopeds, config.scoped || []);
@@ -450,7 +448,7 @@ export class BonbonsServer implements IServer {
     this.option(ENV_MODE, DEFAULTS.env);
     this.option(DEPLOY_MODE, DEFAULTS.deploy);
     this.option(CONFIG_COLLECTION, this.$confColls);
-    this.option(DI_CONTAINER, new PrivateAPI.DIContainer());
+    this.option(DI_CONTAINER, new di.DIContainer());
     this.option(FILE_LOADER, defaultFileLoaderOptions);
     this.option(TPL_RENDER_COMPILER, defaultTplRenderCompilerOptions);
     this.option(ERROR_HANDLER, defaultErrorHandler);
@@ -555,7 +553,7 @@ export class BonbonsServer implements IServer {
     this.use(allowedMethods.bind(mainRouter));
   }
 
-  private $$resolveControllerMethod(method: string, item: IRoute, ctor: IConstructor<any>, name: string, router: KOARouter): void {
+  private $$resolveControllerMethod(method: string, item: IRoute, ctor: Constructor<any>, name: string, router: KOARouter): void {
     const { path, pipes, middlewares: mds } = item;
     if (!path) return;
     const { list: pipelist } = pipes;
@@ -575,7 +573,7 @@ export class BonbonsServer implements IServer {
     pipes.forEach(pipe => this.use(() => pipe));
   }
 
-  private $$addPipeMiddlewares(pipelist: BonbonsPipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
+  private $$addPipeMiddlewares(pipelist: PipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
       const instance = createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
@@ -652,23 +650,23 @@ function getRequestContext(ctx: KOAContext) {
   return ctx.state["$$ctx"] || (ctx.state["$$ctx"] = new Context(ctx));
 }
 
-function resolvePipeList(list: BonbonsPipeEntry[]) {
+function resolvePipeList(list: PipeEntry[]) {
   return (list || []).map(ele => {
     const { target } = <IPipeBundle<any>>ele;
     if (!target) {
-      return { target: <IConstructor<any>>ele, params: {} };
+      return { target: <Constructor<any>>ele, params: {} };
     } else {
       return <IPipeBundle<any>>ele;
     }
   });
 }
 
-function resolveInjections(list: [IJTK<any>, IMPDIV][], injects: InjectableServiceType[]) {
+function resolveInjections(list: [IJTK<any>, IMPDIV][], injects: InjectableType[]) {
   (injects || []).forEach(item => {
     if (item instanceof Array) {
       list.push(item);
     } else {
-      const { token, implement } = <BonbonsInjectEntry<any>>item;
+      const { token, implement } = <InjectEntry<any>>item;
       !token ?
         list.push(<any>[item, item]) :
         list.push([token, implement]);

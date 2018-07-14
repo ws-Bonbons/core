@@ -17,7 +17,7 @@ const plugins_1 = require("@bonbons/plugins");
 const decorators_1 = require("@bonbons/decorators");
 const pipes_1 = require("@bonbons/pipes");
 const { green, cyan, red, blue, magenta, yellow } = plugins_1.ColorsHelper;
-const { InjectScope } = contracts_1.Contracts;
+const { InjectScope, KOA, KOARouter, KOABodyParser, FormType } = contracts_1.Contracts;
 class BaseApp {
     get config() { return this["_configs"]; }
     start() { }
@@ -25,8 +25,8 @@ class BaseApp {
 exports.BaseApp = BaseApp;
 class BonbonsServer {
     constructor(config) {
-        this.$app = new contracts_1.KOA();
-        this.$confColls = new di_1.PrivateAPI.ConfigCollection();
+        this.$app = new KOA();
+        this.$confColls = new di_1.PrivateDI.ConfigCollection();
         this.$port = 3000;
         this.$is_dev = true;
         this._ctlrs = [];
@@ -170,7 +170,7 @@ class BonbonsServer {
         this.option(di_1.ENV_MODE, options_1.Options.env);
         this.option(di_1.DEPLOY_MODE, options_1.Options.deploy);
         this.option(di_1.CONFIG_COLLECTION, this.$confColls);
-        this.option(di_1.DI_CONTAINER, new di_1.PrivateAPI.DIContainer());
+        this.option(di_1.DI_CONTAINER, new di_1.PrivateDI.DIContainer());
         this.option(plugins_1.FILE_LOADER, plugins_1.defaultFileLoaderOptions);
         this.option(plugins_1.TPL_RENDER_COMPILER, plugins_1.defaultTplRenderCompilerOptions);
         this.option(plugins_1.ERROR_HANDLER, plugins_1.defaultErrorHandler);
@@ -244,11 +244,11 @@ class BonbonsServer {
     }
     $$useRouters() {
         this.$logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
-        const mainRouter = new contracts_1.KOARouter();
+        const mainRouter = new KOARouter();
         this._ctlrs.forEach(controllerClass => {
             const proto = controllerClass.prototype;
             const { router } = (proto.getConfig && proto.getConfig());
-            const thisRouter = new contracts_1.KOARouter({ prefix: router.prefix });
+            const thisRouter = new KOARouter({ prefix: router.prefix });
             this.$logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${plugins_1.COLORS.green}${Object.keys(router.routes).length}${plugins_1.COLORS.reset} ]`);
             Object.keys(router.routes).forEach(methodName => {
                 const item = router.routes[methodName];
@@ -389,13 +389,13 @@ function resolveParser(type, configs, options) {
     switch (type) {
         // case FormType.MultipleFormData:
         //     return MultiplePartParser().any();
-        case contracts_1.FormType.ApplicationJson:
+        case FormType.ApplicationJson:
             return resolveParserOptions(di_1.JSON_FORM_OPTIONS, configs, Object.assign({ type: "json" }, options));
-        case contracts_1.FormType.UrlEncoded:
+        case FormType.UrlEncoded:
             return resolveParserOptions(di_1.URL_FORM_OPTIONS, configs, Object.assign({ type: "form" }, options));
         // case FormType.Raw:
         //   return RawParser(resolveParserOptions(BODY_RAW_PARSER, configs, options));
-        case contracts_1.FormType.TextPlain:
+        case FormType.TextPlain:
             return resolveParserOptions(di_1.TEXT_FORM_OPTIONS, configs, Object.assign({ type: "text" }, options));
         default: return null;
     }
@@ -409,7 +409,7 @@ function resolveParserOptions(key, configs, options) {
     delete options.type;
     delete options.extends;
     // console.log(JSON.stringify(Object.assign(configs.get(key) || {}, options)));
-    return contracts_1.KOABodyParser(Object.assign(configs.get(key) || {}, options));
+    return KOABodyParser(Object.assign(configs.get(key) || {}, options));
 }
 function optionAssign(configs, token, newValue) {
     return utils_1.TypeCheck.isFromCustomClass(newValue || {}) ?

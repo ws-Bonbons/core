@@ -1,4 +1,4 @@
-import { BonbonsServerConfig, IConstructor } from "@bonbons/contracts";
+import { Constructor, Contracts as c } from "@bonbons/contracts";
 import { BaseApp } from "./server";
 /**
  * Create a Bonbons.koa App server
@@ -9,6 +9,6 @@ import { BaseApp } from "./server";
  * @param {BonbonsServerConfig} config
  * @returns
  */
-export declare function BonbonsApp(config: BonbonsServerConfig): <T extends BaseApp>(target: IConstructor<T>) => void;
+export declare function BonbonsApp(config: c.BonbonsServerConfig): <T extends BaseApp>(target: Constructor<T>) => void;
 /** Create a Bonbons.koa App server */
 export declare const BKoa: typeof BonbonsApp;

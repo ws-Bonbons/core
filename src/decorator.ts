@@ -1,4 +1,4 @@
-import { BonbonsServerConfig, IConstructor } from "@bonbons/contracts";
+import { Constructor, Contracts as c } from "@bonbons/contracts";
 import { BonbonsServer, BaseApp } from "./server";
 import { GlobalLogger } from "@bonbons/plugins";
 import { DI_CONTAINER } from "@bonbons/di";
@@ -12,8 +12,8 @@ import { DI_CONTAINER } from "@bonbons/di";
  * @param {BonbonsServerConfig} config
  * @returns
  */
-export function BonbonsApp(config: BonbonsServerConfig) {
-  return function <T extends BaseApp>(target: IConstructor<T>) {
+export function BonbonsApp(config: c.BonbonsServerConfig) {
+  return function <T extends BaseApp>(target: Constructor<T>) {
     const theStartup = target.prototype.start;
     target.prototype.start = function () {
       const app = new BonbonsServer(config);
