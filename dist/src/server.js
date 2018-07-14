@@ -17,6 +17,7 @@ const plugins_1 = require("@bonbons/plugins");
 const decorators_1 = require("@bonbons/decorators");
 const pipes_1 = require("@bonbons/pipes");
 const { green, cyan, red, blue, magenta, yellow } = plugins_1.ColorsHelper;
+const { InjectScope } = contracts_1.Contracts;
 class BaseApp {
     get config() { return this["_configs"]; }
     start() { }
@@ -90,10 +91,10 @@ class BonbonsServer {
         return this;
     }
     scoped(...args) {
-        return this.$$preInject(args[0], args[1], contracts_1.InjectScope.Scoped);
+        return this.$$preInject(args[0], args[1], InjectScope.Scoped);
     }
     singleton(...args) {
-        return this.$$preInject(args[0], args[1], contracts_1.InjectScope.Singleton);
+        return this.$$preInject(args[0], args[1], InjectScope.Singleton);
     }
     getConfigs() {
         return this.$confColls.get(di_1.CONFIG_COLLECTION);
@@ -213,12 +214,12 @@ class BonbonsServer {
         this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
         this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
         this._scopeds.forEach(([tk, imp]) => {
-            this.$$injectaFinally(tk, imp, contracts_1.InjectScope.Scoped);
+            this.$$injectaFinally(tk, imp, InjectScope.Scoped);
             this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
         this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
         this._singletons.forEach(([tk, imp]) => {
-            this.$$injectaFinally(tk, imp, contracts_1.InjectScope.Singleton);
+            this.$$injectaFinally(tk, imp, InjectScope.Singleton);
             this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
         this.$di.complete();
@@ -228,8 +229,8 @@ class BonbonsServer {
     $$preInject(provide, classType, type) {
         if (!provide)
             return this;
-        type = type || contracts_1.InjectScope.Singleton;
-        type === contracts_1.InjectScope.Scoped ?
+        type = type || InjectScope.Singleton;
+        type === InjectScope.Scoped ?
             this._scopeds.push([provide, classType || provide]) :
             this._singletons.push([provide, classType || provide]);
         return this;
@@ -237,7 +238,7 @@ class BonbonsServer {
     $$injectaFinally(provide, classType, type) {
         if (!provide)
             return this;
-        type = type || contracts_1.InjectScope.Singleton;
+        type = type || InjectScope.Singleton;
         this.$di.register(provide, classType || provide, type);
         return this;
     }

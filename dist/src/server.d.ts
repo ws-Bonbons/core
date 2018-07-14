@@ -1,8 +1,14 @@
-import { IBonbonsServer as IServer, MiddlewaresFactory, BonbonsServerConfig, BonbonsPipeEntry, BonbonsDeptFactory as InjectFactory, BonbonsEntry as Entry, BonbonsToken as Token, BonbonsConfigCollection as IConfigs, ConfigsCollection as ReadonlyConfigs, InjectableToken, ImplementToken, IConstructor } from "@bonbons/contracts";
+import { Contracts, IBonbonsServer as IServer, MiddlewaresFactory, BonbonsServerConfig, BonbonsPipeEntry, IConstructor } from "@bonbons/contracts";
+import { ConfigsCollection } from "@bonbons/di";
 import { GlobalLogger } from "@bonbons/plugins";
+declare type IJTK<T> = Contracts.InjectableToken<T>;
+declare type IJTFC<T> = Contracts.BonbonsDeptFactory<T>;
+declare type IMPK<T> = Contracts.ImplementToken<T>;
+declare type Entry<T> = Contracts.BonbonsEntry<T>;
+declare type Token<T> = Contracts.BonbonsToken<T>;
 export declare abstract class BaseApp {
     protected readonly logger: GlobalLogger;
-    protected readonly config: ReadonlyConfigs;
+    protected readonly config: ConfigsCollection;
     start(): void;
 }
 export declare class BonbonsServer implements IServer {
@@ -15,7 +21,7 @@ export declare class BonbonsServer implements IServer {
      *
      * @description
      * @private
-     * @type {IDIContainer}
+     * @type {SourceDI}
      * @memberof BonbonsServer
      */
     private $di;
@@ -120,7 +126,7 @@ export declare class BonbonsServer implements IServer {
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
+    scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
     /**
      * Set a scoped servics
      * ---
@@ -141,7 +147,7 @@ export declare class BonbonsServer implements IServer {
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
+    scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
     /**
      * Set a scoped servics
      * ---
@@ -164,7 +170,7 @@ export declare class BonbonsServer implements IServer {
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
+    scoped<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
     /**
      * Set a singleton service
      * ---
@@ -201,7 +207,7 @@ export declare class BonbonsServer implements IServer {
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
+    singleton<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
     /**
      * Set a singleton service
      * ---
@@ -222,7 +228,7 @@ export declare class BonbonsServer implements IServer {
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
+    singleton<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
     /**
      * Set a singleton service
      * ---
@@ -243,8 +249,8 @@ export declare class BonbonsServer implements IServer {
      * @returns {BonbonsServer}
      * @memberof BonbonsServer
      */
-    singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
-    getConfigs(): IConfigs;
+    singleton<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
+    getConfigs(): Contracts.BonbonsConfigCollection;
     /**
      * Start application
      * ---
@@ -253,7 +259,7 @@ export declare class BonbonsServer implements IServer {
      * @param {(configs: ReadonlyConfigs) => void} [run]
      * @memberof BonbonsServer
      */
-    start(run?: (configs: ReadonlyConfigs) => void): void;
+    start(run?: (configs: ConfigsCollection) => void): void;
     private $$afterRun;
     private _clearServer;
     private $$configsInitialization;
@@ -274,3 +280,4 @@ export declare class BonbonsServer implements IServer {
     private $$parseFuncParams;
     private $$selectFuncMethod;
 }
+export {};
