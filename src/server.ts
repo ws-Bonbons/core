@@ -1,4 +1,5 @@
 import {
+  Contracts,
   IBonbonsServer as IServer,
   MiddlewaresFactory,
   BonbonsServerConfig,
@@ -11,24 +12,12 @@ import {
   IBonbonsControllerMetadata as ControllerMetadata,
   IBonbonsMethodResult as SyncResult,
   IMethodResult,
-  BonbonsDeptFactory as InjectFactory,
-  ImplementDIValue,
-  BonbonsEntry as Entry,
-  BonbonsToken as Token,
-  BonbonsConfigCollection as IConfigs,
-  BonbonsDIContainer as IDIContainer,
-  BonbonsToken,
-  ReadonlyDIContainer as ReadonlyDI,
-  ConfigsCollection as ReadonlyConfigs,
   KOAMiddleware,
   KOA,
   KOAContext,
   KOARouter,
   KOABodyParser,
   KOABodyParseOptions,
-  InjectScope,
-  InjectableToken,
-  ImplementToken,
   FormType,
   IConstructor,
   Async,
@@ -36,7 +25,9 @@ import {
   IPipeBundle
 } from "@bonbons/contracts";
 import {
-  PrivateAPI,
+  ConfigsCollection,
+  DIContainer,
+  PrivateAPI as di,
   CONFIG_COLLECTION,
   DI_CONTAINER,
   JSON_RESULT_OPTIONS,
@@ -47,7 +38,8 @@ import {
   TEXT_FORM_OPTIONS,
   URL_FORM_OPTIONS,
   ENV_MODE,
-  DEPLOY_MODE
+  DEPLOY_MODE,
+  PrivateAPI
 } from "@bonbons/di";
 import { invalidOperation, invalidParam, TypeCheck, TypedSerializer } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
@@ -79,10 +71,20 @@ import { Injectable } from "@bonbons/decorators";
 import { createPipeInstance } from "@bonbons/pipes";
 
 const { green, cyan, red, blue, magenta, yellow } = ColorsHelper;
+const { InjectScope } = Contracts;
+type InjectScope = Contracts.InjectScope;
+type SourceConfigs = Contracts.BonbonsConfigCollection;
+type SourceDI = Contracts.BonbonsDIContainer;
+type IJTK<T> = Contracts.InjectableToken<T>;
+type IJTFC<T> = Contracts.BonbonsDeptFactory<T>;
+type IMPK<T> = Contracts.ImplementToken<T>;
+type IMPDIV<T = any> = Contracts.ImplementDIValue<T>;
+type Entry<T> = Contracts.BonbonsEntry<T>;
+type Token<T> = Contracts.BonbonsToken<T>;
 
 export abstract class BaseApp {
   protected readonly logger: GlobalLogger;
-  protected get config(): ReadonlyConfigs { return this["_configs"]; }
+  protected get config(): ConfigsCollection { return this["_configs"]; }
   public start(): void { }
 }
 
@@ -99,16 +101,16 @@ export class BonbonsServer implements IServer {
    *
    * @description
    * @private
-   * @type {IDIContainer}
+   * @type {SourceDI}
    * @memberof BonbonsServer
    */
-  private $di!: IDIContainer;
-  private $rdi!: ReadonlyDI;
-  private $configs!: ReadonlyConfigs;
+  private $di!: SourceDI;
+  private $rdi!: DIContainer;
+  private $configs!: ConfigsCollection;
   private $logger!: GlobalLogger;
 
   private $app = new KOA();
-  private $confColls: IConfigs = new PrivateAPI.ConfigCollection();
+  private $confColls: SourceConfigs = new di.ConfigCollection();
 
   private $port = 3000;
   private $is_dev = true;
@@ -116,8 +118,8 @@ export class BonbonsServer implements IServer {
   private _ctlrs: IConstructor<any>[] = [];
   private _mwares: KOAMiddlewareTuple[] = [];
   private _pipes: BonbonsPipeEntry[] = [];
-  private _scopeds: [InjectableToken<any>, ImplementDIValue][] = [];
-  private _singletons: [InjectableToken<any>, ImplementDIValue][] = [];
+  private _scopeds: [IJTK<any>, IMPDIV][] = [];
+  private _singletons: [IJTK<any>, IMPDIV][] = [];
 
   constructor(config?: BonbonsServerConfig) {
     this.$$defaultOptionsInitialization();
@@ -239,7 +241,7 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
+  public scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
   /**
    * Set a scoped servics
    * ---
@@ -260,7 +262,7 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
+  public scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
   /**
    * Set a scoped servics
    * ---
@@ -283,7 +285,7 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public scoped<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
+  public scoped<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
   public scoped(...args: any[]): BonbonsServer {
     return this.$$preInject(args[0], args[1], InjectScope.Scoped);
   }
@@ -324,7 +326,7 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: ImplementToken<TImplement>): BonbonsServer;
+  public singleton<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
   /**
    * Set a singleton service
    * ---
@@ -345,7 +347,7 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: InjectFactory<TImplement>): BonbonsServer;
+  public singleton<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
   /**
    * Set a singleton service
    * ---
@@ -366,7 +368,7 @@ export class BonbonsServer implements IServer {
    * @returns {BonbonsServer}
    * @memberof BonbonsServer
    */
-  public singleton<TToken, TImplement>(token: InjectableToken<TToken>, srv: TImplement): BonbonsServer;
+  public singleton<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
   public singleton(...args: any[]): BonbonsServer {
     return this.$$preInject(args[0], args[1], InjectScope.Singleton);
   }
@@ -383,7 +385,7 @@ export class BonbonsServer implements IServer {
    * @param {(configs: ReadonlyConfigs) => void} [run]
    * @memberof BonbonsServer
    */
-  public start(run?: (configs: ReadonlyConfigs) => void): void {
+  public start(run?: (configs: ConfigsCollection) => void): void {
     this.$$useCommonOptions();
     this.$$initLogger();
     this.$$initDLookup();
@@ -661,7 +663,7 @@ function resolvePipeList(list: BonbonsPipeEntry[]) {
   });
 }
 
-function resolveInjections(list: [InjectableToken<any>, ImplementDIValue][], injects: InjectableServiceType[]) {
+function resolveInjections(list: [IJTK<any>, IMPDIV][], injects: InjectableServiceType[]) {
   (injects || []).forEach(item => {
     if (item instanceof Array) {
       list.push(item);
@@ -674,12 +676,12 @@ function resolveInjections(list: [InjectableToken<any>, ImplementDIValue][], inj
   });
 }
 
-function resolveFormParser(middlewares: any[], route: IRoute, configs: IConfigs) {
+function resolveFormParser(middlewares: any[], route: IRoute, configs: ConfigsCollection) {
   const parser = resolveParser(route.form.parser, configs, route.form.options);
   if (parser) middlewares.unshift(parser);
 }
 
-function resolveParser(type: FormType, configs: IConfigs, options?: BaseFormOptions) {
+function resolveParser(type: FormType, configs: ConfigsCollection, options?: BaseFormOptions) {
   // console.log(options);
   switch (type) {
     // case FormType.MultipleFormData:
@@ -696,7 +698,7 @@ function resolveParser(type: FormType, configs: IConfigs, options?: BaseFormOpti
   }
 }
 
-function resolveParserOptions<T>(key: BonbonsToken<T>, configs: IConfigs, options: BaseFormOptions): KOAMiddleware {
+function resolveParserOptions<T>(key: Token<T>, configs: ConfigsCollection, options: BaseFormOptions): KOAMiddleware {
   // console.log(options);
   const { type, extends: extendsV } = options;
   (<any>options).enableTypes = [type];
@@ -708,7 +710,7 @@ function resolveParserOptions<T>(key: BonbonsToken<T>, configs: IConfigs, option
   return KOABodyParser(Object.assign(configs.get(key) || {}, options));
 }
 
-function optionAssign(configs: IConfigs, token: any, newValue: any) {
+function optionAssign(configs: ConfigsCollection, token: any, newValue: any) {
   return TypeCheck.isFromCustomClass(newValue || {}) ?
     newValue :
     Object.assign(configs.get(token) || {}, newValue);
@@ -718,7 +720,7 @@ function controllerError(ctlr: any) {
   return invalidParam("Controller to be add is invalid. You can only add the controller been decorated by @Controller(...).", { className: ctlr && ctlr.name });
 }
 
-async function resolveResult(ctx: KOAContext, result: IResult, configs: ReadonlyConfigs, isSync?: boolean) {
+async function resolveResult(ctx: KOAContext, result: IResult, configs: ConfigsCollection, isSync?: boolean) {
   const isAsync = isSync === undefined ? TypeCheck.isFromCustomClass(result || {}, Promise) : !isSync;
   if (isAsync) {
     (<Promise<SyncResult>>result).then(r => resolveResult(ctx, r, configs, true));
