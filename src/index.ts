@@ -1,5 +1,5 @@
-export * from "@bonbons/contracts";
-export * from "@bonbons/di";
+export * from "@bonbons/contracts/dist/src/public-api";
+export * from "@bonbons/di/dist/src/public-api";
 export * from "@bonbons/options";
 export * from "@bonbons/pipes";
 export * from "@bonbons/controllers";

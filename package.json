@@ -24,7 +24,7 @@
     "@bonbons/decorators": "^1.1.3",
     "@bonbons/di": "^1.1.2",
     "@bonbons/options": "^1.1.1",
-    "@bonbons/pipes": "^1.1.2",
+    "@bonbons/pipes": "^1.1.3",
     "@bonbons/plugins": "^1.1.3",
     "@bonbons/utils": "^1.1.1"
   },

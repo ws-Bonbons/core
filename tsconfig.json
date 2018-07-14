@@ -3,17 +3,23 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@bonbons/plugins": [
-        "./../plugins/index.ts"
+      "@bonbons/contracts": [
+        "./../contracts/index.ts"
+      ],
+      "@bonbons/contracts/dist/src/public-api": [
+        "./../contracts/src/public-api.ts"
       ],
       "@bonbons/di": [
         "./../di/index.ts"
       ],
+      "@bonbons/di/dist/src/public-api": [
+        "./../di/src/public-api.ts"
+      ],
+      "@bonbons/plugins": [
+        "./../plugins/index.ts"
+      ],
       "@bonbons/utils": [
         "./../utils/index.ts"
-      ],
-      "@bonbons/contracts": [
-        "./../contracts/index.ts"
       ],
       "@bonbons/options": [
         "./../options/index.ts"
