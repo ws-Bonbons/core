@@ -576,7 +576,6 @@ export class BonbonsServer implements IServer {
   private $$preparePipes(): KOAMiddleware[] {
     const pipes: KOAMiddleware[] = [];
     this.$$addPipeMiddlewares(this._pipes, pipes);
-    // pipes.forEach(pipe => this.use(() => pipe));
     return pipes;
   }
 
@@ -584,7 +583,8 @@ export class BonbonsServer implements IServer {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
       const instance = p.createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
-      return instance.process(next);
+      await instance.process();
+      await next();
     }));
   }
 
