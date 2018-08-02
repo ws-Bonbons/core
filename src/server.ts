@@ -22,7 +22,7 @@ import {
   ENV_MODE,
   DEPLOY_MODE
 } from "@bonbons/di/dist/src/public-api";
-import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "@bonbons/utils";
+import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID, setColor } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
 import { Options as DEFAULTS } from "@bonbons/options";
 import {
@@ -575,7 +575,7 @@ export class BonbonsServer implements IServer {
     this.$$addPipeMiddlewares(pipelist, middlewares);
     this.$$selectFormParser(item, middlewares);
     this.$$decideFinalStep(item, middlewares, ctor, name);
-    this.$$selectFuncMethod(router, method)(path, ...[requestScopeStart, ...preMiddles, ...middlewares]);
+    this.$$selectFuncMethod(router, method)(path, ...[requestScopeStart(this.$logger), ...preMiddles, ...middlewares]);
   }
 
   private $$preparePipes(): KOAMiddleware[] {
@@ -742,8 +742,11 @@ async function resolveResult(ctx: KOAContext, result: IResult, configs: ConfigsC
   }
 }
 
-async function requestScopeStart(ctx: KOAContext, next: () => Promise<any>) {
-  ctx.state["$$scopeId"] = UUID.Create();
-  console.log(`request start with scopeid : [${ctx.state["$$scopeId"]}]`);
-  await next();
+function requestScopeStart(logger: Logger) {
+  return async (ctx: KOAContext, next: () => Promise<any>) => {
+    ctx.state["$$scopeId"] = UUID.Create();
+    logger.debug(
+      "core", "requestScopeStart", `request start with scopeid : [${setColor("yellow", ctx.state["$$scopeId"])}]`);
+    await next();
+  };
 }
