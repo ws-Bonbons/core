@@ -1,8 +1,15 @@
-import { Contracts as c, Constructor, Async, BaseFormOptions } from "@bonbons/contracts";
+import { Contracts as c } from "@bonbons/contracts";
+import { PrivateDI as di } from "@bonbons/di";
+import { PluginsAPI as g } from "@bonbons/plugins";
+import { PipeAPI as p } from "@bonbons/pipes";
+import {
+  Constructor,
+  Async,
+  BaseFormOptions
+} from "@bonbons/contracts/dist/src/public-api";
 import {
   ConfigsCollection,
   DIContainer,
-  PrivateDI as di,
   CONFIG_COLLECTION,
   DI_CONTAINER,
   JSON_RESULT_OPTIONS,
@@ -14,16 +21,15 @@ import {
   URL_FORM_OPTIONS,
   ENV_MODE,
   DEPLOY_MODE
-} from "@bonbons/di";
+} from "@bonbons/di/dist/src/public-api";
 import { invalidOperation, invalidParam, TypeCheck, TypedSerializer } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
 import { Options as DEFAULTS } from "@bonbons/options";
 import {
   Logger,
-  GLOBAL_LOGGER,
-  PluginsAPI as g,
   InjectService,
   ConfigService,
+  GLOBAL_LOGGER,
   ERROR_HANDLER,
   ERROR_PAGE_TEMPLATE,
   defaultErrorHandler,
@@ -38,9 +44,8 @@ import {
   BonbonsRender,
   FILE_LOADER,
   defaultFileLoaderOptions
-} from "@bonbons/plugins";
+} from "@bonbons/plugins/dist/src/public-api";
 import { Injectable } from "@bonbons/decorators";
-import { PipeAPI as p } from "@bonbons/pipes";
 
 const { green, cyan, red, blue, magenta, yellow } = g.ColorsHelper;
 const { COLORS } = g;

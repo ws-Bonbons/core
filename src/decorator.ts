@@ -1,7 +1,7 @@
 import { Constructor, Contracts as c } from "@bonbons/contracts";
 import { BonbonsServer, BaseApp } from "./server";
-import { Logger } from "@bonbons/plugins";
 import { DI_CONTAINER } from "@bonbons/di";
+import { Logger } from "@bonbons/plugins/dist/src/public-api";
 
 /**
  * Create a Bonbons.koa App server
