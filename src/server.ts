@@ -22,7 +22,7 @@ import {
   ENV_MODE,
   DEPLOY_MODE
 } from "@bonbons/di/dist/src/public-api";
-import { invalidOperation, invalidParam, TypeCheck, TypedSerializer } from "@bonbons/utils";
+import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
 import { Options as DEFAULTS } from "@bonbons/options";
 import {
@@ -564,7 +564,7 @@ export class BonbonsServer implements IServer {
     const { list: mdsList } = mds;
     this.$logger.trace("core", this.$$resolveControllerMethod.name,
       `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
-    const middlewares: KOAMiddleware[] = [...(mdsList || [])];
+    const middlewares: KOAMiddleware[] = [requestScopeStart, ...(mdsList || [])];
     this.$$addPipeMiddlewares(pipelist, middlewares);
     this.$$selectFormParser(item, middlewares);
     this.$$decideFinalStep(item, middlewares, ctor, name);
@@ -732,4 +732,10 @@ async function resolveResult(ctx: KOAContext, result: IResult, configs: ConfigsC
     ctx.type = (<IMethodResult>result).type || "text/plain";
     ctx.body = await (<IMethodResult>result).toString(configs);
   }
+}
+
+async function requestScopeStart(ctx: KOAContext, next: () => Promise<any>) {
+  ctx.state["$$scopeId"] = UUID.Create();
+  console.log(`request start with scopeid : [${ctx.state["$$scopeId"]}]`);
+  await next();
 }
