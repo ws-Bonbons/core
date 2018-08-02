@@ -509,7 +509,6 @@ export class BonbonsServer implements IServer {
       this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
     this.$di.complete();
-    console.log(this.$di.getConfig());
     this.$logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
     this.$logger.debug("core", this.$$initDIContainer.name, "-----------------------");
   }
