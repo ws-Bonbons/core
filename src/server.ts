@@ -22,7 +22,7 @@ import {
   ENV_MODE,
   DEPLOY_MODE
 } from "@bonbons/di/dist/src/public-api";
-import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID, setColor } from "@bonbons/utils";
+import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
 import { Options as DEFAULTS } from "@bonbons/options";
 import {
@@ -123,6 +123,7 @@ export class BonbonsServer implements IServer {
   private _ctlrs: Constructor<any>[] = [];
   private _mwares: MiddlewareTuple[] = [];
   private _pipes: PipeEntry[] = [];
+  private _renews: [IJTK<any>, IMPDIV][] = [];
   private _scopeds: [IJTK<any>, IMPDIV][] = [];
   private _singletons: [IJTK<any>, IMPDIV][] = [];
 
@@ -212,7 +213,91 @@ export class BonbonsServer implements IServer {
   }
 
   /**
-   * Set a scoped servics
+   * Set a renew service
+   * ---
+   * * service should be decorated by @Injectable(...)
+   *
+   * Set a renew service with constructor.
+   * All renew services will be created new instance anywhere and everytime.
+   *
+   * @description
+   * @author Big Mogician
+   * @template TInject
+   * @param {Constructor<TInject>} srv
+   * @returns {BonbonsServer}
+   * @memberof BonbonsServer
+   */
+  public renew<TInject>(srv: Constructor<TInject>): BonbonsServer;
+  /**
+   * Set a renew service
+   * ---
+   * * service should be decorated by @Injectable(...)
+   *
+   * Set a renew service with injectable token (such abstract class,
+   * but not the typescript interface because there's no interface in
+   * the javascript runtime) and implement service constructor. All
+   * All renew services will be created new instance anywhere and everytime.
+   *
+   * @description
+   * @author Big Mogician
+   * @template TToken
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {ImplementToken<TImplement>} srv
+   * @returns {BonbonsServer}
+   * @memberof BonbonsServer
+   */
+  public renew<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
+  /**
+   * Set a renew service
+   * ---
+   * * service should be decorated by @Injectable(...)
+   *
+   * Set a renew service with injectable token (such abstract class,
+   * but not the typescript interface because there's no interface in
+   * the javascript runtime) and implement service instance factory
+   * ( pure function with no side effects).
+   * All renew services will be created new instance anywhere and everytime.
+   *
+   * @description
+   * @author Big Mogician
+   * @template TToken
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {InjectFactory<TImplement>} srv
+   * @returns {BonbonsServer}
+   * @memberof BonbonsServer
+   */
+  public renew<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
+  /**
+   * Set a renew service
+   * ---
+   * * service should be decorated by @Injectable(...)
+   *
+   * Set a renew service with injectable token (such abstract class,
+   * but not the typescript interface because there's no interface in
+   * the javascript runtime) and a well-created implement service instance.
+   * All renew services will be created new
+   * instance everytime and anywhere (but injecting by instance means
+   * the instance may be changed in runtime, so please be careful. If you
+   * want to prevent this situation, use a service factory here).
+   *
+   * @description
+   * @author Big Mogician
+   * @template TInject
+   * @template TImplement
+   * @param {InjectableToken<TToken>} token
+   * @param {TImplement} srv
+   * @returns {BonbonsServer}
+   * @memberof BonbonsServer
+   */
+  public renew<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
+  public renew(...args: any[]): BonbonsServer {
+    return this.$$preInject(args[0], args[1], InjectScope.New);
+  }
+
+  /**
+   * Set a scoped service
    * ---
    * * service should be decorated by @Injectable(...)
    *
@@ -228,7 +313,7 @@ export class BonbonsServer implements IServer {
    */
   public scoped<TInject>(srv: Constructor<TInject>): BonbonsServer;
   /**
-   * Set a scoped servics
+   * Set a scoped service
    * ---
    * * service should be decorated by @Injectable(...)
    *
@@ -248,7 +333,7 @@ export class BonbonsServer implements IServer {
    */
   public scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
   /**
-   * Set a scoped servics
+   * Set a scoped service
    * ---
    * * service should be decorated by @Injectable(...)
    *
@@ -269,7 +354,7 @@ export class BonbonsServer implements IServer {
    */
   public scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
   /**
-   * Set a scoped servics
+   * Set a scoped service
    * ---
    * * service should be decorated by @Injectable(...)
    *
@@ -427,6 +512,7 @@ export class BonbonsServer implements IServer {
   private $$configsInitialization(config?: ServerConfig): void {
     if (config) {
       this._ctlrs = config.controller || [];
+      resolveInjections(this._renews, config.renews || []);
       resolveInjections(this._scopeds, config.scoped || []);
       resolveInjections(this._singletons, config.singleton || []);
       this._pipes.push(...(config.pipes || []));
@@ -504,6 +590,11 @@ export class BonbonsServer implements IServer {
 
   private $$initDIContainer(): void {
     this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
+    this.$logger.debug("core", this.$$initDIContainer.name, `renew inject entry count : [ ${green(this._renews.length)} ].`);
+    this._renews.forEach(([tk, imp]) => {
+      this.$$injectaFinally(tk, imp, InjectScope.New);
+      this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+    });
     this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
     this._scopeds.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.Scope);
@@ -524,9 +615,11 @@ export class BonbonsServer implements IServer {
   private $$preInject(provide: any, classType?: any, type?: InjectScope): BonbonsServer {
     if (!provide) return this;
     type = type || InjectScope.Singleton;
-    type === InjectScope.Scope ?
-      this._scopeds.push([provide, classType || provide]) :
-      this._singletons.push([provide, classType || provide]);
+    switch (type) {
+      case InjectScope.New: this._renews.push([provide, classType || provide]); break;
+      case InjectScope.Scope: this._scopeds.push([provide, classType || provide]); break;
+      default: this._singletons.push([provide, classType || provide]);
+    }
     return this;
   }
 
@@ -746,7 +839,7 @@ function requestScopeStart(logger: Logger) {
   return async (ctx: KOAContext, next: () => Promise<any>) => {
     ctx.state["$$scopeId"] = UUID.Create();
     logger.debug(
-      "core", "requestScopeStart", `request start with scopeid : [${setColor("yellow", ctx.state["$$scopeId"])}]`);
+      "core", "requestScopeStart", `request start with scopeid : [${yellow(ctx.state["$$scopeId"])}]`);
     await next();
   };
 }
