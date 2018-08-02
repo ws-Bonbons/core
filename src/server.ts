@@ -58,6 +58,8 @@ const {
   FormType
 } = c;
 type InjectScope = c.InjectScope;
+type InjectToken = c.InjectToken;
+type ScopeID = c.ScopeID;
 type SourceConfigs = c.BonbonsConfigCollection;
 type SourceDI = c.BonbonsDIContainer;
 type IJTK<T> = c.InjectableToken<T>;
@@ -493,7 +495,11 @@ export class BonbonsServer implements IServer {
   private $$initDLookup(): void {
     this.$di = this.$confColls.get(DI_CONTAINER);
     this.$rdi = { get: this.$di.get.bind(this.$di) };
-    this.singleton(InjectService, () => this.$rdi);
+    this.scoped(InjectService,
+      (scopeId: ScopeID) => ({
+        get: (token: InjectToken) => this.$rdi.get(token, scopeId),
+        scopeId
+      }));
   }
 
   private $$initDIContainer(): void {
