@@ -393,7 +393,6 @@ export class BonbonsServer implements IServer {
     this.$$initLogger();
     this.$$initDLookup();
     this.$$initDIContainer();
-    this.$$preparePipes();
     this.$$useRouters();
     this.$$useMiddlewares();
     this.$app.listen(this.$port);
@@ -566,23 +565,25 @@ export class BonbonsServer implements IServer {
     const { list: mdsList } = mds;
     this.$logger.trace("core", this.$$resolveControllerMethod.name,
       `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
-    const middlewares: KOAMiddleware[] = [requestScopeStart, ...(mdsList || [])];
+    const middlewares: KOAMiddleware[] = [...(mdsList || [])];
+    const preMiddles = this.$$preparePipes();
     this.$$addPipeMiddlewares(pipelist, middlewares);
     this.$$selectFormParser(item, middlewares);
     this.$$decideFinalStep(item, middlewares, ctor, name);
-    this.$$selectFuncMethod(router, method)(path, ...middlewares);
+    this.$$selectFuncMethod(router, method)(path, ...[requestScopeStart, ...preMiddles, ...middlewares]);
   }
 
-  private $$preparePipes(): void {
+  private $$preparePipes(): KOAMiddleware[] {
     const pipes: KOAMiddleware[] = [];
     this.$$addPipeMiddlewares(this._pipes, pipes);
-    pipes.forEach(pipe => this.use(() => pipe));
+    // pipes.forEach(pipe => this.use(() => pipe));
+    return pipes;
   }
 
   private $$addPipeMiddlewares(pipelist: PipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
-      const instance = p.createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe)) || [], getRequestContext(ctx));
+      const instance = p.createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
       return instance.process(next);
     }));
   }
@@ -597,7 +598,7 @@ export class BonbonsServer implements IServer {
 
   private $$decideFinalStep(route: IRoute, middlewares: KOAMiddleware[], constructor: any, methodName: string): void {
     middlewares.push(async (ctx) => {
-      const list = this.$di.getDepedencies(getDependencies(constructor));
+      const list = this.$di.getDepedencies(getDependencies(constructor), ctx.state["$$scopeId"]);
       const c = new constructor(...list);
       c.$$ctx = getRequestContext(ctx);
       c.$$injector = this.$rdi;
