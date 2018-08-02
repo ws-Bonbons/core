@@ -1,6 +1,7 @@
-import { Contracts as c, Constructor } from "@bonbons/contracts";
-import { ConfigsCollection } from "@bonbons/di";
-import { Logger } from "@bonbons/plugins";
+import { Contracts as c } from "@bonbons/contracts";
+import { Constructor } from "@bonbons/contracts/dist/src/public-api";
+import { ConfigsCollection } from "@bonbons/di/dist/src/public-api";
+import { Logger } from "@bonbons/plugins/dist/src/public-api";
 declare type IJTK<T> = c.InjectableToken<T>;
 declare type IJTFC<T> = c.BonbonsDeptFactory<T>;
 declare type IMPK<T> = c.ImplementToken<T>;
@@ -39,6 +40,7 @@ export declare class BonbonsServer implements IServer {
     private _ctlrs;
     private _mwares;
     private _pipes;
+    private _renews;
     private _scopeds;
     private _singletons;
     constructor(config?: ServerConfig);
@@ -96,7 +98,87 @@ export declare class BonbonsServer implements IServer {
      */
     controller<T>(ctlr: Constructor<T>): BonbonsServer;
     /**
-     * Set a scoped servics
+     * Set a renew service
+     * ---
+     * * service should be decorated by @Injectable(...)
+     *
+     * Set a renew service with constructor.
+     * All renew services will be created new instance anywhere and everytime.
+     *
+     * @description
+     * @author Big Mogician
+     * @template TInject
+     * @param {Constructor<TInject>} srv
+     * @returns {BonbonsServer}
+     * @memberof BonbonsServer
+     */
+    renew<TInject>(srv: Constructor<TInject>): BonbonsServer;
+    /**
+     * Set a renew service
+     * ---
+     * * service should be decorated by @Injectable(...)
+     *
+     * Set a renew service with injectable token (such abstract class,
+     * but not the typescript interface because there's no interface in
+     * the javascript runtime) and implement service constructor. All
+     * All renew services will be created new instance anywhere and everytime.
+     *
+     * @description
+     * @author Big Mogician
+     * @template TToken
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {ImplementToken<TImplement>} srv
+     * @returns {BonbonsServer}
+     * @memberof BonbonsServer
+     */
+    renew<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
+    /**
+     * Set a renew service
+     * ---
+     * * service should be decorated by @Injectable(...)
+     *
+     * Set a renew service with injectable token (such abstract class,
+     * but not the typescript interface because there's no interface in
+     * the javascript runtime) and implement service instance factory
+     * ( pure function with no side effects).
+     * All renew services will be created new instance anywhere and everytime.
+     *
+     * @description
+     * @author Big Mogician
+     * @template TToken
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {InjectFactory<TImplement>} srv
+     * @returns {BonbonsServer}
+     * @memberof BonbonsServer
+     */
+    renew<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
+    /**
+     * Set a renew service
+     * ---
+     * * service should be decorated by @Injectable(...)
+     *
+     * Set a renew service with injectable token (such abstract class,
+     * but not the typescript interface because there's no interface in
+     * the javascript runtime) and a well-created implement service instance.
+     * All renew services will be created new
+     * instance everytime and anywhere (but injecting by instance means
+     * the instance may be changed in runtime, so please be careful. If you
+     * want to prevent this situation, use a service factory here).
+     *
+     * @description
+     * @author Big Mogician
+     * @template TInject
+     * @template TImplement
+     * @param {InjectableToken<TToken>} token
+     * @param {TImplement} srv
+     * @returns {BonbonsServer}
+     * @memberof BonbonsServer
+     */
+    renew<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
+    /**
+     * Set a scoped service
      * ---
      * * service should be decorated by @Injectable(...)
      *
@@ -112,7 +194,7 @@ export declare class BonbonsServer implements IServer {
      */
     scoped<TInject>(srv: Constructor<TInject>): BonbonsServer;
     /**
-     * Set a scoped servics
+     * Set a scoped service
      * ---
      * * service should be decorated by @Injectable(...)
      *
@@ -132,7 +214,7 @@ export declare class BonbonsServer implements IServer {
      */
     scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IMPK<TImplement>): BonbonsServer;
     /**
-     * Set a scoped servics
+     * Set a scoped service
      * ---
      * * service should be decorated by @Injectable(...)
      *
@@ -153,7 +235,7 @@ export declare class BonbonsServer implements IServer {
      */
     scoped<TToken, TImplement>(token: IJTK<TToken>, srv: IJTFC<TImplement>): BonbonsServer;
     /**
-     * Set a scoped servics
+     * Set a scoped service
      * ---
      * * service should be decorated by @Injectable(...)
      *

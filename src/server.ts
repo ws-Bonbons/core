@@ -707,7 +707,7 @@ export class BonbonsServer implements IServer {
 
   private $$parseFuncParams(ctx: KOAContext, route: IRoute): any[] {
     const querys = (route.funcParams || []).map(({ key, type, isQuery }) => {
-      const pack = isQuery ? ctx.query : ctx.params;
+      const pack = isQuery ? ctx.query : (<any>ctx).params;
       return !type ? pack[key] : type(pack[key]);
     });
     if (route.form && route.form.index >= 0) {

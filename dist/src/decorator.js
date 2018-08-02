@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("./server");
-const plugins_1 = require("@bonbons/plugins");
 const di_1 = require("@bonbons/di");
+const public_api_1 = require("@bonbons/plugins/dist/src/public-api");
 /**
  * Create a Bonbons.koa App server
  * ---
@@ -22,7 +22,7 @@ function BonbonsApp(config) {
             const instance = this;
             instance._configs = { get: conf.get.bind(conf) };
             const di = instance._configs.get(di_1.DI_CONTAINER);
-            instance.logger = di.get(plugins_1.Logger);
+            instance.logger = di.get(public_api_1.Logger);
             theStartup && theStartup.bind(instance)();
         };
     };

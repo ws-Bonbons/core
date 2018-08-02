@@ -10,12 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const contracts_1 = require("@bonbons/contracts");
 const di_1 = require("@bonbons/di");
+const plugins_1 = require("@bonbons/plugins");
+const pipes_1 = require("@bonbons/pipes");
+const public_api_1 = require("@bonbons/di/dist/src/public-api");
 const utils_1 = require("@bonbons/utils");
 const controllers_1 = require("@bonbons/controllers");
 const options_1 = require("@bonbons/options");
-const plugins_1 = require("@bonbons/plugins");
+const public_api_2 = require("@bonbons/plugins/dist/src/public-api");
 const decorators_1 = require("@bonbons/decorators");
-const pipes_1 = require("@bonbons/pipes");
+const { getDependencies } = di_1.PrivateDI;
 const { green, cyan, red, blue, magenta, yellow } = plugins_1.PluginsAPI.ColorsHelper;
 const { COLORS } = plugins_1.PluginsAPI;
 const { InjectScope, KOA, KOARouter, KOABodyParser, FormType } = contracts_1.Contracts;
@@ -33,6 +36,7 @@ class BonbonsServer {
         this._ctlrs = [];
         this._mwares = [];
         this._pipes = [];
+        this._renews = [];
         this._scopeds = [];
         this._singletons = [];
         this.$$defaultOptionsInitialization();
@@ -91,14 +95,17 @@ class BonbonsServer {
         this._ctlrs.push(ctlr);
         return this;
     }
+    renew(...args) {
+        return this.$$preInject(args[0], args[1], InjectScope.New);
+    }
     scoped(...args) {
-        return this.$$preInject(args[0], args[1], InjectScope.Scoped);
+        return this.$$preInject(args[0], args[1], InjectScope.Scope);
     }
     singleton(...args) {
         return this.$$preInject(args[0], args[1], InjectScope.Singleton);
     }
     getConfigs() {
-        return this.$confColls.get(di_1.CONFIG_COLLECTION);
+        return this.$confColls.get(public_api_1.CONFIG_COLLECTION);
     }
     /**
      * Start application
@@ -113,7 +120,6 @@ class BonbonsServer {
         this.$$initLogger();
         this.$$initDLookup();
         this.$$initDIContainer();
-        this.$$preparePipes();
         this.$$useRouters();
         this.$$useMiddlewares();
         this.$app.listen(this.$port);
@@ -127,8 +133,8 @@ class BonbonsServer {
         // console.log(this._configs);
     }
     $$afterRun() {
-        const { compilerFactory: factory } = this.$confColls.get(plugins_1.TPL_RENDER_COMPILER);
-        this.option(plugins_1.TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
+        const { compilerFactory: factory } = this.$confColls.get(public_api_2.TPL_RENDER_COMPILER);
+        this.option(public_api_2.TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
     }
     _clearServer() {
         delete this.$app;
@@ -143,6 +149,7 @@ class BonbonsServer {
     $$configsInitialization(config) {
         if (config) {
             this._ctlrs = config.controller || [];
+            resolveInjections(this._renews, config.renews || []);
             resolveInjections(this._scopeds, config.scoped || []);
             resolveInjections(this._singletons, config.singleton || []);
             this._pipes.push(...(config.pipes || []));
@@ -168,54 +175,62 @@ class BonbonsServer {
         }
     }
     $$defaultOptionsInitialization() {
-        this.option(di_1.ENV_MODE, options_1.Options.env);
-        this.option(di_1.DEPLOY_MODE, options_1.Options.deploy);
-        this.option(di_1.CONFIG_COLLECTION, this.$confColls);
-        this.option(di_1.DI_CONTAINER, new di_1.PrivateDI.DIContainer());
-        this.option(plugins_1.FILE_LOADER, plugins_1.defaultFileLoaderOptions);
-        this.option(plugins_1.TPL_RENDER_COMPILER, plugins_1.defaultTplRenderCompilerOptions);
-        this.option(plugins_1.ERROR_HANDLER, plugins_1.defaultErrorHandler);
-        this.option(plugins_1.ERROR_PAGE_TEMPLATE, plugins_1.defaultErrorPageTemplate);
-        this.option(plugins_1.ERROR_RENDER_OPRIONS, plugins_1.defaultErrorPageRenderOptions);
-        this.option(plugins_1.TPL_RENDER_OPTIONS, plugins_1.defaultViewTplRenderOptions);
-        this.option(plugins_1.GLOBAL_LOGGER, plugins_1.PluginsAPI.BonbonsLogger);
-        this.option(di_1.STATIC_TYPED_RESOLVER, utils_1.TypedSerializer);
-        this.option(di_1.JSON_RESULT_OPTIONS, options_1.Options.jsonResult);
-        this.option(di_1.STRING_RESULT_OPTIONS, options_1.Options.stringResult);
-        this.option(di_1.BODY_PARSE_OPTIONS, options_1.Options.koaBodyParser);
-        this.option(di_1.JSON_FORM_OPTIONS, options_1.Options.jsonForm);
-        this.option(di_1.TEXT_FORM_OPTIONS, options_1.Options.textForm);
-        this.option(di_1.URL_FORM_OPTIONS, options_1.Options.urlForm);
+        this.option(public_api_1.ENV_MODE, options_1.Options.env);
+        this.option(public_api_1.DEPLOY_MODE, options_1.Options.deploy);
+        this.option(public_api_1.CONFIG_COLLECTION, this.$confColls);
+        this.option(public_api_1.DI_CONTAINER, new di_1.PrivateDI.DIContainer());
+        this.option(public_api_2.FILE_LOADER, public_api_2.defaultFileLoaderOptions);
+        this.option(public_api_2.TPL_RENDER_COMPILER, public_api_2.defaultTplRenderCompilerOptions);
+        this.option(public_api_2.ERROR_HANDLER, public_api_2.defaultErrorHandler);
+        this.option(public_api_2.ERROR_PAGE_TEMPLATE, public_api_2.defaultErrorPageTemplate);
+        this.option(public_api_2.ERROR_RENDER_OPRIONS, public_api_2.defaultErrorPageRenderOptions);
+        this.option(public_api_2.TPL_RENDER_OPTIONS, public_api_2.defaultViewTplRenderOptions);
+        this.option(public_api_2.GLOBAL_LOGGER, plugins_1.PluginsAPI.BonbonsLogger);
+        this.option(public_api_1.STATIC_TYPED_RESOLVER, utils_1.TypedSerializer);
+        this.option(public_api_1.JSON_RESULT_OPTIONS, options_1.Options.jsonResult);
+        this.option(public_api_1.STRING_RESULT_OPTIONS, options_1.Options.stringResult);
+        this.option(public_api_1.BODY_PARSE_OPTIONS, options_1.Options.koaBodyParser);
+        this.option(public_api_1.JSON_FORM_OPTIONS, options_1.Options.jsonForm);
+        this.option(public_api_1.TEXT_FORM_OPTIONS, options_1.Options.textForm);
+        this.option(public_api_1.URL_FORM_OPTIONS, options_1.Options.urlForm);
     }
     $$useCommonOptions() {
-        const { mode } = this.$confColls.get(di_1.ENV_MODE);
+        const { mode } = this.$confColls.get(public_api_1.ENV_MODE);
         this.$is_dev = mode === "development";
-        const { port } = this.$confColls.get(di_1.DEPLOY_MODE);
+        const { port } = this.$confColls.get(public_api_1.DEPLOY_MODE);
         this.$port = port || 3000;
         this.$configs = { get: this.$confColls.get.bind(this.$confColls) };
-        this.singleton(plugins_1.ConfigService, () => this.$configs);
-        this.singleton(plugins_1.RenderService, () => new plugins_1.BonbonsRender(this.$configs));
-        const handler = this.$confColls.get(plugins_1.ERROR_HANDLER);
+        this.singleton(public_api_2.ConfigService, () => this.$configs);
+        this.singleton(public_api_2.RenderService, () => new public_api_2.BonbonsRender(this.$configs));
+        const handler = this.$confColls.get(public_api_2.ERROR_HANDLER);
         this._mwares.unshift([handler, [this.$configs]]);
     }
     $$initLogger() {
-        const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(plugins_1.GLOBAL_LOGGER));
-        const env = this.$confColls.get(di_1.ENV_MODE);
+        const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(public_api_2.GLOBAL_LOGGER));
+        const env = this.$confColls.get(public_api_1.ENV_MODE);
         this.$logger = new LoggerConstructor(env);
-        this.singleton(plugins_1.Logger, () => this.$logger);
-        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(plugins_1.Logger.name)} ].`);
+        this.singleton(public_api_2.Logger, () => this.$logger);
+        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(public_api_2.Logger.name)} ].`);
         this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
     }
     $$initDLookup() {
-        this.$di = this.$confColls.get(di_1.DI_CONTAINER);
+        this.$di = this.$confColls.get(public_api_1.DI_CONTAINER);
         this.$rdi = { get: this.$di.get.bind(this.$di) };
-        this.singleton(plugins_1.InjectService, () => this.$rdi);
+        this.scoped(public_api_2.InjectService, (scopeId) => ({
+            get: (token) => this.$rdi.get(token, scopeId),
+            scopeId
+        }));
     }
     $$initDIContainer() {
         this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
+        this.$logger.debug("core", this.$$initDIContainer.name, `renew inject entry count : [ ${green(this._renews.length)} ].`);
+        this._renews.forEach(([tk, imp]) => {
+            this.$$injectaFinally(tk, imp, InjectScope.New);
+            this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
+        });
         this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
         this._scopeds.forEach(([tk, imp]) => {
-            this.$$injectaFinally(tk, imp, InjectScope.Scoped);
+            this.$$injectaFinally(tk, imp, InjectScope.Scope);
             this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
         this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
@@ -231,9 +246,15 @@ class BonbonsServer {
         if (!provide)
             return this;
         type = type || InjectScope.Singleton;
-        type === InjectScope.Scoped ?
-            this._scopeds.push([provide, classType || provide]) :
-            this._singletons.push([provide, classType || provide]);
+        switch (type) {
+            case InjectScope.New:
+                this._renews.push([provide, classType || provide]);
+                break;
+            case InjectScope.Scope:
+                this._scopeds.push([provide, classType || provide]);
+                break;
+            default: this._singletons.push([provide, classType || provide]);
+        }
         return this;
     }
     $$injectaFinally(provide, classType, type) {
@@ -274,21 +295,23 @@ class BonbonsServer {
         const { list: mdsList } = mds;
         this.$logger.trace("core", this.$$resolveControllerMethod.name, `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
         const middlewares = [...(mdsList || [])];
+        const preMiddles = this.$$preparePipes();
         this.$$addPipeMiddlewares(pipelist, middlewares);
         this.$$selectFormParser(item, middlewares);
         this.$$decideFinalStep(item, middlewares, ctor, name);
-        this.$$selectFuncMethod(router, method)(path, ...middlewares);
+        this.$$selectFuncMethod(router, method)(path, ...[requestScopeStart(this.$logger), ...preMiddles, ...middlewares]);
     }
     $$preparePipes() {
         const pipes = [];
         this.$$addPipeMiddlewares(this._pipes, pipes);
-        pipes.forEach(pipe => this.use(() => pipe));
+        return pipes;
     }
     $$addPipeMiddlewares(pipelist, middlewares) {
         resolvePipeList(pipelist).forEach(bundle => middlewares.push((ctx, next) => __awaiter(this, void 0, void 0, function* () {
             const { target: pipe } = bundle;
-            const instance = pipes_1.PipeAPI.createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
-            return instance.process(next);
+            const instance = pipes_1.PipeAPI.createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
+            yield instance.process();
+            yield next();
         })));
     }
     $$useMiddlewares() {
@@ -300,7 +323,7 @@ class BonbonsServer {
     }
     $$decideFinalStep(route, middlewares, constructor, methodName) {
         middlewares.push((ctx) => __awaiter(this, void 0, void 0, function* () {
-            const list = this.$di.resolveDeps(constructor);
+            const list = this.$di.getDepedencies(getDependencies(constructor), ctx.state["$$scopeId"]);
             const c = new constructor(...list);
             c.$$ctx = getRequestContext(ctx);
             c.$$injector = this.$rdi;
@@ -316,7 +339,7 @@ class BonbonsServer {
         if (route.form && route.form.index >= 0) {
             const { index } = route.form;
             const staticType = (route.funcParams || [])[index];
-            const resolver = this.$confColls.get(di_1.STATIC_TYPED_RESOLVER);
+            const resolver = this.$confColls.get(public_api_1.STATIC_TYPED_RESOLVER);
             querys[index] = !!(resolver && staticType && staticType.type) ?
                 resolver.FromObject(ctx.request.body, staticType.type) :
                 ctx.request.body;
@@ -391,13 +414,13 @@ function resolveParser(type, configs, options) {
         // case FormType.MultipleFormData:
         //     return MultiplePartParser().any();
         case FormType.ApplicationJson:
-            return resolveParserOptions(di_1.JSON_FORM_OPTIONS, configs, Object.assign({ type: "json" }, options));
+            return resolveParserOptions(public_api_1.JSON_FORM_OPTIONS, configs, Object.assign({ type: "json" }, options));
         case FormType.UrlEncoded:
-            return resolveParserOptions(di_1.URL_FORM_OPTIONS, configs, Object.assign({ type: "form" }, options));
+            return resolveParserOptions(public_api_1.URL_FORM_OPTIONS, configs, Object.assign({ type: "form" }, options));
         // case FormType.Raw:
         //   return RawParser(resolveParserOptions(BODY_RAW_PARSER, configs, options));
         case FormType.TextPlain:
-            return resolveParserOptions(di_1.TEXT_FORM_OPTIONS, configs, Object.assign({ type: "text" }, options));
+            return resolveParserOptions(public_api_1.TEXT_FORM_OPTIONS, configs, Object.assign({ type: "text" }, options));
         default: return null;
     }
 }
@@ -438,6 +461,13 @@ function resolveResult(ctx, result, configs, isSync) {
             ctx.type = result.type || "text/plain";
             ctx.body = yield result.toString(configs);
         }
+    });
+}
+function requestScopeStart(logger) {
+    return (ctx, next) => __awaiter(this, void 0, void 0, function* () {
+        ctx.state["$$scopeId"] = utils_1.UUID.Create();
+        logger.debug("core", "requestScopeStart", `request start with scopeid : [${yellow(ctx.state["$$scopeId"])}]`);
+        yield next();
     });
 }
 //# sourceMappingURL=server.js.map
