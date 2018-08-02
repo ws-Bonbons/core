@@ -47,6 +47,7 @@ import {
 } from "@bonbons/plugins/dist/src/public-api";
 import { Injectable } from "@bonbons/decorators";
 
+const { getDependencies } = di;
 const { green, cyan, red, blue, magenta, yellow } = g.ColorsHelper;
 const { COLORS } = g;
 const {
@@ -289,7 +290,7 @@ export class BonbonsServer implements IServer {
    */
   public scoped<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
   public scoped(...args: any[]): BonbonsServer {
-    return this.$$preInject(args[0], args[1], InjectScope.Scoped);
+    return this.$$preInject(args[0], args[1], InjectScope.Scope);
   }
 
   /**
@@ -500,7 +501,7 @@ export class BonbonsServer implements IServer {
     this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
     this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
     this._scopeds.forEach(([tk, imp]) => {
-      this.$$injectaFinally(tk, imp, InjectScope.Scoped);
+      this.$$injectaFinally(tk, imp, InjectScope.Scope);
       this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
     this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
@@ -509,6 +510,7 @@ export class BonbonsServer implements IServer {
       this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
     this.$di.complete();
+    console.log(this.$di.getConfig());
     this.$logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
     this.$logger.debug("core", this.$$initDIContainer.name, "-----------------------");
   }
@@ -518,7 +520,7 @@ export class BonbonsServer implements IServer {
   private $$preInject(provide: any, classType?: any, type?: InjectScope): BonbonsServer {
     if (!provide) return this;
     type = type || InjectScope.Singleton;
-    type === InjectScope.Scoped ?
+    type === InjectScope.Scope ?
       this._scopeds.push([provide, classType || provide]) :
       this._singletons.push([provide, classType || provide]);
     return this;
@@ -580,7 +582,7 @@ export class BonbonsServer implements IServer {
   private $$addPipeMiddlewares(pipelist: PipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
-      const instance = p.createPipeInstance(bundle, this.$di.resolveDeps(pipe) || [], getRequestContext(ctx));
+      const instance = p.createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe)) || [], getRequestContext(ctx));
       return instance.process(next);
     }));
   }
@@ -595,7 +597,7 @@ export class BonbonsServer implements IServer {
 
   private $$decideFinalStep(route: IRoute, middlewares: KOAMiddleware[], constructor: any, methodName: string): void {
     middlewares.push(async (ctx) => {
-      const list = this.$di.resolveDeps(constructor);
+      const list = this.$di.getDepedencies(getDependencies(constructor));
       const c = new constructor(...list);
       c.$$ctx = getRequestContext(ctx);
       c.$$injector = this.$rdi;
