@@ -1,16 +1,7 @@
-import { Contracts as c } from "@bonbons/contracts";
-import { Constructor } from "@bonbons/contracts/dist/src/public-api";
-import { ConfigsCollection } from "@bonbons/di/dist/src/public-api";
-import { Logger } from "@bonbons/plugins/dist/src/public-api";
-declare type IJTK<T> = c.InjectableToken<T>;
-declare type IJTFC<T> = c.BonbonsDeptFactory<T>;
-declare type IMPK<T> = c.ImplementToken<T>;
-declare type Entry<T> = c.BonbonsEntry<T>;
-declare type Token<T> = c.BonbonsToken<T>;
-declare type IServer = c.IBonbonsServer;
-declare type MiddlewaresFactory = c.MiddlewaresFactory;
-declare type ServerConfig = c.BonbonsServerConfig;
-declare type PipeEntry = c.BonbonsPipeEntry;
+import { BonbonsConfigCollection as SourceConfigs, InjectableToken as IJTK, BonbonsDeptFactory as IJTFC, ImplementToken as IMPK, BonbonsEntry as Entry, BonbonsToken as Token, IBonbonsServer as IServer, BonbonsServerConfig as ServerConfig, BonbonsPipeEntry as PipeEntry, MiddlewaresFactory } from "@bonbons/contracts/dist/src/private-api";
+import { Constructor } from "@bonbons/contracts";
+import { ConfigsCollection } from "@bonbons/di";
+import { Logger } from "@bonbons/plugins";
 export declare abstract class BaseApp {
     protected readonly logger: Logger;
     protected readonly config: ConfigsCollection;
@@ -336,7 +327,7 @@ export declare class BonbonsServer implements IServer {
      * @memberof BonbonsServer
      */
     singleton<TToken, TImplement>(token: IJTK<TToken>, srv: TImplement): BonbonsServer;
-    getConfigs(): c.BonbonsConfigCollection;
+    getConfigs(): SourceConfigs;
     /**
      * Start application
      * ---
@@ -366,4 +357,3 @@ export declare class BonbonsServer implements IServer {
     private $$parseFuncParams;
     private $$selectFuncMethod;
 }
-export {};

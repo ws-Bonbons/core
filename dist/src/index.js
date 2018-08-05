@@ -3,9 +3,9 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("@bonbons/di/dist/src/public-api"));
-__export(require("@bonbons/pipes/dist/src/public-api"));
-__export(require("@bonbons/plugins/dist/src/public-api"));
+__export(require("@bonbons/di/dist"));
+__export(require("@bonbons/pipes"));
+__export(require("@bonbons/plugins"));
 __export(require("@bonbons/options"));
 __export(require("@bonbons/controllers"));
 __export(require("@bonbons/decorators"));

@@ -8,20 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const contracts_1 = require("@bonbons/contracts");
+const private_api_1 = require("@bonbons/contracts/dist/src/private-api");
+const private_api_2 = require("@bonbons/di/dist/src/private-api");
+const private_api_3 = require("@bonbons/plugins/dist/src/private-api");
+const private_api_4 = require("@bonbons/pipes/dist/src/private-api");
 const di_1 = require("@bonbons/di");
-const plugins_1 = require("@bonbons/plugins");
-const pipes_1 = require("@bonbons/pipes");
-const public_api_1 = require("@bonbons/di/dist/src/public-api");
 const utils_1 = require("@bonbons/utils");
 const controllers_1 = require("@bonbons/controllers");
 const options_1 = require("@bonbons/options");
-const public_api_2 = require("@bonbons/plugins/dist/src/public-api");
+const plugins_1 = require("@bonbons/plugins");
 const decorators_1 = require("@bonbons/decorators");
-const { getDependencies } = di_1.PrivateDI;
-const { green, cyan, red, blue, magenta, yellow } = plugins_1.PluginsAPI.ColorsHelper;
-const { COLORS } = plugins_1.PluginsAPI;
-const { InjectScope, KOA, KOARouter, KOABodyParser, FormType } = contracts_1.Contracts;
+const { red, green, yellow, cyan, blue, magenta } = private_api_3.ColorsHelper;
 class BaseApp {
     get config() { return this["_configs"]; }
     start() { }
@@ -29,8 +26,8 @@ class BaseApp {
 exports.BaseApp = BaseApp;
 class BonbonsServer {
     constructor(config) {
-        this.$app = new KOA();
-        this.$confColls = new di_1.PrivateDI.ConfigCollection();
+        this.$app = new private_api_1.KOA();
+        this.$confColls = new private_api_2.ConfigCollection();
         this.$port = 3000;
         this.$is_dev = true;
         this._ctlrs = [];
@@ -96,16 +93,16 @@ class BonbonsServer {
         return this;
     }
     renew(...args) {
-        return this.$$preInject(args[0], args[1], InjectScope.New);
+        return this.$$preInject(args[0], args[1], private_api_1.InjectScope.New);
     }
     scoped(...args) {
-        return this.$$preInject(args[0], args[1], InjectScope.Scope);
+        return this.$$preInject(args[0], args[1], private_api_1.InjectScope.Scope);
     }
     singleton(...args) {
-        return this.$$preInject(args[0], args[1], InjectScope.Singleton);
+        return this.$$preInject(args[0], args[1], private_api_1.InjectScope.Singleton);
     }
     getConfigs() {
-        return this.$confColls.get(public_api_1.CONFIG_COLLECTION);
+        return this.$confColls.get(di_1.CONFIG_COLLECTION);
     }
     /**
      * Start application
@@ -133,8 +130,8 @@ class BonbonsServer {
         // console.log(this._configs);
     }
     $$afterRun() {
-        const { compilerFactory: factory } = this.$confColls.get(public_api_2.TPL_RENDER_COMPILER);
-        this.option(public_api_2.TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
+        const { compilerFactory: factory } = this.$confColls.get(plugins_1.TPL_RENDER_COMPILER);
+        this.option(plugins_1.TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
     }
     _clearServer() {
         delete this.$app;
@@ -175,48 +172,48 @@ class BonbonsServer {
         }
     }
     $$defaultOptionsInitialization() {
-        this.option(public_api_1.ENV_MODE, options_1.Options.env);
-        this.option(public_api_1.DEPLOY_MODE, options_1.Options.deploy);
-        this.option(public_api_1.CONFIG_COLLECTION, this.$confColls);
-        this.option(public_api_1.DI_CONTAINER, new di_1.PrivateDI.DIContainer());
-        this.option(public_api_2.FILE_LOADER, public_api_2.defaultFileLoaderOptions);
-        this.option(public_api_2.TPL_RENDER_COMPILER, public_api_2.defaultTplRenderCompilerOptions);
-        this.option(public_api_2.ERROR_HANDLER, public_api_2.defaultErrorHandler);
-        this.option(public_api_2.ERROR_PAGE_TEMPLATE, public_api_2.defaultErrorPageTemplate);
-        this.option(public_api_2.ERROR_RENDER_OPRIONS, public_api_2.defaultErrorPageRenderOptions);
-        this.option(public_api_2.TPL_RENDER_OPTIONS, public_api_2.defaultViewTplRenderOptions);
-        this.option(public_api_2.GLOBAL_LOGGER, plugins_1.PluginsAPI.BonbonsLogger);
-        this.option(public_api_1.STATIC_TYPED_RESOLVER, utils_1.TypedSerializer);
-        this.option(public_api_1.JSON_RESULT_OPTIONS, options_1.Options.jsonResult);
-        this.option(public_api_1.STRING_RESULT_OPTIONS, options_1.Options.stringResult);
-        this.option(public_api_1.BODY_PARSE_OPTIONS, options_1.Options.koaBodyParser);
-        this.option(public_api_1.JSON_FORM_OPTIONS, options_1.Options.jsonForm);
-        this.option(public_api_1.TEXT_FORM_OPTIONS, options_1.Options.textForm);
-        this.option(public_api_1.URL_FORM_OPTIONS, options_1.Options.urlForm);
+        this.option(di_1.ENV_MODE, options_1.Options.env);
+        this.option(di_1.DEPLOY_MODE, options_1.Options.deploy);
+        this.option(di_1.CONFIG_COLLECTION, this.$confColls);
+        this.option(di_1.DI_CONTAINER, new private_api_2.DIContainer());
+        this.option(plugins_1.FILE_LOADER, plugins_1.defaultFileLoaderOptions);
+        this.option(plugins_1.TPL_RENDER_COMPILER, plugins_1.defaultTplRenderCompilerOptions);
+        this.option(plugins_1.ERROR_HANDLER, plugins_1.defaultErrorHandler);
+        this.option(plugins_1.ERROR_PAGE_TEMPLATE, plugins_1.defaultErrorPageTemplate);
+        this.option(plugins_1.ERROR_RENDER_OPRIONS, plugins_1.defaultErrorPageRenderOptions);
+        this.option(plugins_1.TPL_RENDER_OPTIONS, plugins_1.defaultViewTplRenderOptions);
+        this.option(plugins_1.GLOBAL_LOGGER, private_api_3.BonbonsLogger);
+        this.option(di_1.STATIC_TYPED_RESOLVER, utils_1.TypedSerializer);
+        this.option(di_1.JSON_RESULT_OPTIONS, options_1.Options.jsonResult);
+        this.option(di_1.STRING_RESULT_OPTIONS, options_1.Options.stringResult);
+        this.option(di_1.BODY_PARSE_OPTIONS, options_1.Options.koaBodyParser);
+        this.option(di_1.JSON_FORM_OPTIONS, options_1.Options.jsonForm);
+        this.option(di_1.TEXT_FORM_OPTIONS, options_1.Options.textForm);
+        this.option(di_1.URL_FORM_OPTIONS, options_1.Options.urlForm);
     }
     $$useCommonOptions() {
-        const { mode } = this.$confColls.get(public_api_1.ENV_MODE);
+        const { mode } = this.$confColls.get(di_1.ENV_MODE);
         this.$is_dev = mode === "development";
-        const { port } = this.$confColls.get(public_api_1.DEPLOY_MODE);
+        const { port } = this.$confColls.get(di_1.DEPLOY_MODE);
         this.$port = port || 3000;
         this.$configs = { get: this.$confColls.get.bind(this.$confColls) };
-        this.singleton(public_api_2.ConfigService, () => this.$configs);
-        this.singleton(public_api_2.RenderService, () => new public_api_2.BonbonsRender(this.$configs));
-        const handler = this.$confColls.get(public_api_2.ERROR_HANDLER);
+        this.singleton(plugins_1.ConfigService, () => this.$configs);
+        this.singleton(plugins_1.RenderService, () => new plugins_1.BonbonsRender(this.$configs));
+        const handler = this.$confColls.get(plugins_1.ERROR_HANDLER);
         this._mwares.unshift([handler, [this.$configs]]);
     }
     $$initLogger() {
-        const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(public_api_2.GLOBAL_LOGGER));
-        const env = this.$confColls.get(public_api_1.ENV_MODE);
+        const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(plugins_1.GLOBAL_LOGGER));
+        const env = this.$confColls.get(di_1.ENV_MODE);
         this.$logger = new LoggerConstructor(env);
-        this.singleton(public_api_2.Logger, () => this.$logger);
-        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(public_api_2.Logger.name)} ].`);
+        this.singleton(plugins_1.Logger, () => this.$logger);
+        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(plugins_1.Logger.name)} ].`);
         this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
     }
     $$initDLookup() {
-        this.$di = this.$confColls.get(public_api_1.DI_CONTAINER);
+        this.$di = this.$confColls.get(di_1.DI_CONTAINER);
         this.$rdi = { get: this.$di.get.bind(this.$di) };
-        this.scoped(public_api_2.InjectService, (scopeId) => ({
+        this.scoped(plugins_1.InjectService, (scopeId) => ({
             get: (token) => this.$rdi.get(token, scopeId),
             scopeId
         }));
@@ -225,17 +222,17 @@ class BonbonsServer {
         this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
         this.$logger.debug("core", this.$$initDIContainer.name, `renew inject entry count : [ ${green(this._renews.length)} ].`);
         this._renews.forEach(([tk, imp]) => {
-            this.$$injectaFinally(tk, imp, InjectScope.New);
+            this.$$injectaFinally(tk, imp, private_api_1.InjectScope.New);
             this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
         this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
         this._scopeds.forEach(([tk, imp]) => {
-            this.$$injectaFinally(tk, imp, InjectScope.Scope);
+            this.$$injectaFinally(tk, imp, private_api_1.InjectScope.Scope);
             this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
         this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
         this._singletons.forEach(([tk, imp]) => {
-            this.$$injectaFinally(tk, imp, InjectScope.Singleton);
+            this.$$injectaFinally(tk, imp, private_api_1.InjectScope.Singleton);
             this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
         this.$di.complete();
@@ -245,12 +242,12 @@ class BonbonsServer {
     $$preInject(provide, classType, type) {
         if (!provide)
             return this;
-        type = type || InjectScope.Singleton;
+        type = type || private_api_1.InjectScope.Singleton;
         switch (type) {
-            case InjectScope.New:
+            case private_api_1.InjectScope.New:
                 this._renews.push([provide, classType || provide]);
                 break;
-            case InjectScope.Scope:
+            case private_api_1.InjectScope.Scope:
                 this._scopeds.push([provide, classType || provide]);
                 break;
             default: this._singletons.push([provide, classType || provide]);
@@ -260,18 +257,18 @@ class BonbonsServer {
     $$injectaFinally(provide, classType, type) {
         if (!provide)
             return this;
-        type = type || InjectScope.Singleton;
+        type = type || private_api_1.InjectScope.Singleton;
         this.$di.register(provide, classType || provide, type);
         return this;
     }
     $$useRouters() {
         this.$logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
-        const mainRouter = new KOARouter();
+        const mainRouter = new private_api_1.KOARouter();
         this._ctlrs.forEach(controllerClass => {
             const proto = controllerClass.prototype;
             const { router } = (proto.getConfig && proto.getConfig());
-            const thisRouter = new KOARouter({ prefix: router.prefix });
-            this.$logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${COLORS.green}${Object.keys(router.routes).length}${COLORS.reset} ]`);
+            const thisRouter = new private_api_1.KOARouter({ prefix: router.prefix });
+            this.$logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${private_api_3.COLORS.green}${Object.keys(router.routes).length}${private_api_3.COLORS.reset} ]`);
             Object.keys(router.routes).forEach(methodName => {
                 const item = router.routes[methodName];
                 const { allowMethods } = item;
@@ -309,7 +306,7 @@ class BonbonsServer {
     $$addPipeMiddlewares(pipelist, middlewares) {
         resolvePipeList(pipelist).forEach(bundle => middlewares.push((ctx, next) => __awaiter(this, void 0, void 0, function* () {
             const { target: pipe } = bundle;
-            const instance = pipes_1.PipeAPI.createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
+            const instance = private_api_4.createPipeInstance(bundle, this.$di.getDepedencies(private_api_2.getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
             yield instance.process();
             yield next();
         })));
@@ -323,7 +320,7 @@ class BonbonsServer {
     }
     $$decideFinalStep(route, middlewares, constructor, methodName) {
         middlewares.push((ctx) => __awaiter(this, void 0, void 0, function* () {
-            const list = this.$di.getDepedencies(getDependencies(constructor), ctx.state["$$scopeId"]);
+            const list = this.$di.getDepedencies(private_api_2.getDependencies(constructor), ctx.state["$$scopeId"]);
             const c = new constructor(...list);
             c.$$ctx = getRequestContext(ctx);
             c.$$injector = this.$rdi;
@@ -339,7 +336,7 @@ class BonbonsServer {
         if (route.form && route.form.index >= 0) {
             const { index } = route.form;
             const staticType = (route.funcParams || [])[index];
-            const resolver = this.$confColls.get(public_api_1.STATIC_TYPED_RESOLVER);
+            const resolver = this.$confColls.get(di_1.STATIC_TYPED_RESOLVER);
             querys[index] = !!(resolver && staticType && staticType.type) ?
                 resolver.FromObject(ctx.request.body, staticType.type) :
                 ctx.request.body;
@@ -413,14 +410,14 @@ function resolveParser(type, configs, options) {
     switch (type) {
         // case FormType.MultipleFormData:
         //     return MultiplePartParser().any();
-        case FormType.ApplicationJson:
-            return resolveParserOptions(public_api_1.JSON_FORM_OPTIONS, configs, Object.assign({ type: "json" }, options));
-        case FormType.UrlEncoded:
-            return resolveParserOptions(public_api_1.URL_FORM_OPTIONS, configs, Object.assign({ type: "form" }, options));
+        case private_api_1.FormType.ApplicationJson:
+            return resolveParserOptions(di_1.JSON_FORM_OPTIONS, configs, Object.assign({ type: "json" }, options));
+        case private_api_1.FormType.UrlEncoded:
+            return resolveParserOptions(di_1.URL_FORM_OPTIONS, configs, Object.assign({ type: "form" }, options));
         // case FormType.Raw:
         //   return RawParser(resolveParserOptions(BODY_RAW_PARSER, configs, options));
-        case FormType.TextPlain:
-            return resolveParserOptions(public_api_1.TEXT_FORM_OPTIONS, configs, Object.assign({ type: "text" }, options));
+        case private_api_1.FormType.TextPlain:
+            return resolveParserOptions(di_1.TEXT_FORM_OPTIONS, configs, Object.assign({ type: "text" }, options));
         default: return null;
     }
 }
@@ -433,7 +430,7 @@ function resolveParserOptions(key, configs, options) {
     delete options.type;
     delete options.extends;
     // console.log(JSON.stringify(Object.assign(configs.get(key) || {}, options)));
-    return KOABodyParser(Object.assign(configs.get(key) || {}, options));
+    return private_api_1.KOABodyParser(Object.assign(configs.get(key) || {}, options));
 }
 function optionAssign(configs, token, newValue) {
     return utils_1.TypeCheck.isFromCustomClass(newValue || {}) ?

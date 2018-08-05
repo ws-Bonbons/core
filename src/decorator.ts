@@ -1,4 +1,5 @@
-import { Constructor, Contracts as c } from "@bonbons/contracts";
+import { Constructor } from "@bonbons/contracts";
+import { BonbonsServerConfig } from "@bonbons/contracts/dist/src/private-api";
 import { BonbonsServer, BaseApp } from "./server";
 import { DI_CONTAINER } from "@bonbons/di";
 import { Logger } from "@bonbons/plugins/dist/src/public-api";
@@ -12,7 +13,7 @@ import { Logger } from "@bonbons/plugins/dist/src/public-api";
  * @param {BonbonsServerConfig} config
  * @returns
  */
-export function BonbonsApp(config: c.BonbonsServerConfig) {
+export function BonbonsApp(config: BonbonsServerConfig) {
   return function <T extends BaseApp>(target: Constructor<T>) {
     const theStartup = target.prototype.start;
     target.prototype.start = function () {

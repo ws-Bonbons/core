@@ -6,26 +6,26 @@
       "@bonbons/contracts": [
         "./../contracts/index.ts"
       ],
-      "@bonbons/contracts/dist/src/public-api": [
-        "./../contracts/src/public-api.ts"
+      "@bonbons/contracts/dist/src/private-api": [
+        "./../contracts/src/private-api.ts"
       ],
       "@bonbons/di": [
         "./../di/index.ts"
       ],
-      "@bonbons/di/dist/src/public-api": [
-        "./../di/src/public-api.ts"
+      "@bonbons/di/dist/src/private-api": [
+        "./../di/src/private-api.ts"
       ],
       "@bonbons/plugins": [
         "./../plugins/index.ts"
       ],
-      "@bonbons/plugins/dist/src/public-api": [
-        "./../plugins/src/public-api.ts"
+      "@bonbons/plugins/dist/src/private-api": [
+        "./../plugins/src/private-api.ts"
       ],
       "@bonbons/pipes": [
         "./../pipes/index.ts"
       ],
-      "@bonbons/pipes/dist/src/public-api": [
-        "./../pipes/src/public-api.ts"
+      "@bonbons/pipes/dist/src/private-api": [
+        "./../pipes/src/private-api.ts"
       ],
       "@bonbons/utils": [
         "./../utils/index.ts"

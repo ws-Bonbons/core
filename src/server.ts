@@ -1,15 +1,52 @@
-import { Contracts as c } from "@bonbons/contracts";
-import { PrivateDI as di } from "@bonbons/di";
-import { PluginsAPI as g } from "@bonbons/plugins";
-import { PipeAPI as p } from "@bonbons/pipes";
+import {
+  BonbonsConfigCollection as SourceConfigs,
+  BonbonsDIContainer as SourceDI,
+  InjectableToken as IJTK,
+  BonbonsDeptFactory as IJTFC,
+  ImplementToken as IMPK,
+  ImplementDIValue as IMPDIV,
+  BonbonsEntry as Entry,
+  BonbonsToken as Token,
+  IBonbonsServer as IServer,
+  BonbonsServerConfig as ServerConfig,
+  BonbonsInjectEntry as InjectEntry,
+  InjectableServiceType as InjectableType,
+  BonbonsPipeEntry as PipeEntry,
+  UnionBonbonsResult as IResult,
+  IBonbonsControllerMetadata as ControllerMetadata,
+  IBonbonsMethodResult as SyncResult,
+  KOAMiddlewareTuple as MiddlewareTuple,
+  ReadonlyDIContainer as ReadonlyDI,
+  IMethodResult,
+  KOAMiddleware,
+  KOAContext,
+  KOARouter,
+  KOABodyParseOptions,
+  IPipeBundle,
+  IRoute,
+  MiddlewaresFactory,
+  InjectScope,
+  KOA,
+  KOABodyParser,
+  FormType,
+  IBonbonsController,
+  InjectToken,
+  ScopeID
+} from "@bonbons/contracts/dist/src/private-api";
+import { getDependencies, ConfigCollection, DIContainer } from "@bonbons/di/dist/src/private-api";
+import {
+  ColorsHelper,
+  COLORS,
+  BonbonsLogger
+} from "@bonbons/plugins/dist/src/private-api";
+import { createPipeInstance } from "@bonbons/pipes/dist/src/private-api";
 import {
   Constructor,
   Async,
   BaseFormOptions
-} from "@bonbons/contracts/dist/src/public-api";
+} from "@bonbons/contracts";
 import {
   ConfigsCollection,
-  DIContainer,
   CONFIG_COLLECTION,
   DI_CONTAINER,
   JSON_RESULT_OPTIONS,
@@ -21,7 +58,7 @@ import {
   URL_FORM_OPTIONS,
   ENV_MODE,
   DEPLOY_MODE
-} from "@bonbons/di/dist/src/public-api";
+} from "@bonbons/di";
 import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
 import { Options as DEFAULTS } from "@bonbons/options";
@@ -44,48 +81,10 @@ import {
   BonbonsRender,
   FILE_LOADER,
   defaultFileLoaderOptions
-} from "@bonbons/plugins/dist/src/public-api";
+} from "@bonbons/plugins";
 import { Injectable } from "@bonbons/decorators";
 
-const { getDependencies } = di;
-const { green, cyan, red, blue, magenta, yellow } = g.ColorsHelper;
-const { COLORS } = g;
-const {
-  InjectScope,
-  KOA,
-  KOARouter,
-  KOABodyParser,
-  FormType
-} = c;
-type InjectScope = c.InjectScope;
-type InjectToken = c.InjectToken;
-type ScopeID = c.ScopeID;
-type SourceConfigs = c.BonbonsConfigCollection;
-type SourceDI = c.BonbonsDIContainer;
-type IJTK<T> = c.InjectableToken<T>;
-type IJTFC<T> = c.BonbonsDeptFactory<T>;
-type IMPK<T> = c.ImplementToken<T>;
-type IMPDIV<T = any> = c.ImplementDIValue<T>;
-type Entry<T> = c.BonbonsEntry<T>;
-type Token<T> = c.BonbonsToken<T>;
-type FormType = c.FormType;
-type IServer = c.IBonbonsServer;
-type MiddlewaresFactory = c.MiddlewaresFactory;
-type ServerConfig = c.BonbonsServerConfig;
-type InjectEntry<T> = c.BonbonsInjectEntry<T>;
-type MiddlewareTuple = c.KOAMiddlewareTuple;
-type InjectableType = c.InjectableServiceType;
-type PipeEntry = c.BonbonsPipeEntry;
-type IRoute = c.IRoute;
-type IResult = c.UnionBonbonsResult;
-type ControllerMetadata = c.IBonbonsControllerMetadata;
-type SyncResult = c.IBonbonsMethodResult;
-type IMethodResult = c.IMethodResult;
-type KOAMiddleware = c.KOAMiddleware;
-type KOAContext = c.KOAContext;
-type KOARouter = c.KOARouter;
-type KOABodyParseOptions = c.KOABodyParseOptions;
-type IPipeBundle<T> = c.IPipeBundle<T>;
+const { red, green, yellow, cyan, blue, magenta } = ColorsHelper;
 
 export abstract class BaseApp {
   protected readonly logger: Logger;
@@ -110,12 +109,12 @@ export class BonbonsServer implements IServer {
    * @memberof BonbonsServer
    */
   private $di!: SourceDI;
-  private $rdi!: DIContainer;
+  private $rdi!: ReadonlyDI;
   private $configs!: ConfigsCollection;
   private $logger!: Logger;
 
   private $app = new KOA();
-  private $confColls: SourceConfigs = new di.ConfigCollection();
+  private $confColls: SourceConfigs = new ConfigCollection();
 
   private $port = 3000;
   private $is_dev = true;
@@ -207,7 +206,7 @@ export class BonbonsServer implements IServer {
    * @memberof BonbonsServer
    */
   public controller<T>(ctlr: Constructor<T>): BonbonsServer {
-    if (!ctlr || !(<c.IBonbonsController>ctlr.prototype).__valid) throw controllerError(ctlr);
+    if (!ctlr || !(<IBonbonsController>ctlr.prototype).__valid) throw controllerError(ctlr);
     this._ctlrs.push(ctlr);
     return this;
   }
@@ -540,14 +539,14 @@ export class BonbonsServer implements IServer {
     this.option(ENV_MODE, DEFAULTS.env);
     this.option(DEPLOY_MODE, DEFAULTS.deploy);
     this.option(CONFIG_COLLECTION, this.$confColls);
-    this.option(DI_CONTAINER, new di.DIContainer());
+    this.option(DI_CONTAINER, new DIContainer());
     this.option(FILE_LOADER, defaultFileLoaderOptions);
     this.option(TPL_RENDER_COMPILER, defaultTplRenderCompilerOptions);
     this.option(ERROR_HANDLER, defaultErrorHandler);
     this.option(ERROR_PAGE_TEMPLATE, defaultErrorPageTemplate);
     this.option(ERROR_RENDER_OPRIONS, defaultErrorPageRenderOptions);
     this.option(TPL_RENDER_OPTIONS, defaultViewTplRenderOptions);
-    this.option(GLOBAL_LOGGER, g.BonbonsLogger);
+    this.option(GLOBAL_LOGGER, BonbonsLogger);
     this.option(STATIC_TYPED_RESOLVER, TypedSerializer);
     this.option(JSON_RESULT_OPTIONS, DEFAULTS.jsonResult);
     this.option(STRING_RESULT_OPTIONS, DEFAULTS.stringResult);
@@ -680,7 +679,7 @@ export class BonbonsServer implements IServer {
   private $$addPipeMiddlewares(pipelist: PipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
-      const instance = p.createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
+      const instance = createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
       await instance.process();
       await next();
     }));
