@@ -569,12 +569,13 @@ export class BonbonsServer implements IServer {
   }
 
   private $$initLogger(): void {
+    const caller = "$$initLogger";
     const LoggerConstructor = Injectable()(this.$confColls.get(GLOBAL_LOGGER));
     const env = this.$confColls.get(ENV_MODE);
     this.$logger = new LoggerConstructor(env);
     this.singleton(Logger, () => this.$logger);
-    this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(Logger.name)} ].`);
-    this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
+    this.$logger.debug("core", caller, `logger init : [ type -> ${green(Logger.name)} ].`);
+    this.$logger.debug("core", caller, "-----------------------");
   }
 
   private $$initDLookup(): void {
@@ -588,25 +589,26 @@ export class BonbonsServer implements IServer {
   }
 
   private $$initDIContainer(): void {
-    this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
-    this.$logger.debug("core", this.$$initDIContainer.name, `renew inject entry count : [ ${green(this._renews.length)} ].`);
+    const caller = "$$initDIContainer";
+    this.$logger.debug("core", caller, "init DI container.");
+    this.$logger.debug("core", caller, `renew inject entry count : [ ${green(this._renews.length)} ].`);
     this._renews.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.New);
-      this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", caller, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
-    this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
+    this.$logger.debug("core", caller, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
     this._scopeds.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.Scope);
-      this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", caller, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
-    this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
+    this.$logger.debug("core", caller, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
     this._singletons.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.Singleton);
-      this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", caller, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
     });
     this.$di.complete();
-    this.$logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
-    this.$logger.debug("core", this.$$initDIContainer.name, "-----------------------");
+    this.$logger.debug("core", caller, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
+    this.$logger.debug("core", caller, "-----------------------");
   }
 
   private $$preInject(provide: any, type: InjectScope): BonbonsServer;
@@ -632,13 +634,14 @@ export class BonbonsServer implements IServer {
   }
 
   private $$useRouters(): void {
-    this.$logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
+    const caller = "$$useRouters";
+    this.$logger.debug("core", caller, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
     const mainRouter = new KOARouter();
     this._ctlrs.forEach(controllerClass => {
       const proto = controllerClass.prototype;
       const { router } = <ControllerMetadata>(proto.getConfig && proto.getConfig());
       const thisRouter = new KOARouter({ prefix: router.prefix as string });
-      this.$logger.debug("core", this.$$useRouters.name,
+      this.$logger.debug("core", caller,
         `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${COLORS.green}${Object.keys(router.routes).length}${COLORS.reset} ]`);
       Object.keys(router.routes).forEach(methodName => {
         const item = router.routes[methodName];
@@ -648,19 +651,20 @@ export class BonbonsServer implements IServer {
       });
       mainRouter.use(thisRouter.routes()).use(thisRouter.allowedMethods());
     });
-    this.$logger.debug("core", this.$$useRouters.name, "app routers initialization completed.");
-    this.$logger.debug("core", this.$$useRouters.name, "-----------------------");
+    this.$logger.debug("core", caller, "app routers initialization completed.");
+    this.$logger.debug("core", caller, "-----------------------");
     const { routes, allowedMethods } = mainRouter;
     this.use(routes.bind(mainRouter));
     this.use(allowedMethods.bind(mainRouter));
   }
 
   private $$resolveControllerMethod(method: string, item: IRoute, ctor: Constructor<any>, name: string, router: KOARouter): void {
+    const caller = "$$resolveControllerMethod";
     const { path, pipes, middlewares: mds } = item;
     if (!path) return;
     const { list: pipelist } = pipes;
     const { list: mdsList } = mds;
-    this.$logger.trace("core", this.$$resolveControllerMethod.name,
+    this.$logger.trace("core", caller,
       `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
     const middlewares: KOAMiddleware[] = [...(mdsList || [])];
     const preMiddles = this.$$preparePipes();
