@@ -709,7 +709,7 @@ export class BonbonsServer implements IServer {
   }
 
   private $$parseFuncParams(ctx: KOAContext, route: IRoute): any[] {
-    const querys = (route.funcParams || []).map(({ key, type, isQuery }) => {
+    const querys = (route.funcParams || []).filter(i => i.key !== null).map(({ key, type, isQuery }) => {
       const pack = isQuery ? ctx.query : (<any>ctx).params;
       return !type ? pack[key] : type(pack[key]);
     });
@@ -828,21 +828,28 @@ function controllerError(ctlr: any) {
 
 async function resolveResult(ctx: KOAContext, result: IResult, configs: ConfigsCollection, isSync?: boolean) {
   const isAsync = isSync === undefined ? TypeCheck.isFromCustomClass(result || {}, Promise) : !isSync;
+  let sResult: IMethodResult = <any>result;
   if (isAsync) {
-    (<Promise<SyncResult>>result).then(r => resolveResult(ctx, r, configs, true));
-  } else {
-    if (!result) { ctx.body = ""; return; }
-    if (typeof result === "string") { ctx.body = result; return; }
-    ctx.type = (<IMethodResult>result).type || "text/plain";
-    ctx.body = await (<IMethodResult>result).toString(configs);
+    // (<Promise<SyncResult>>result).then(r => resolveResult(ctx, r, configs, true));
+    sResult = await <Promise<IMethodResult>>result;
   }
+  // else {
+  //   console.log(await (<any>result).toString(configs));
+  //   if (!result) { ctx.body = ""; return; }
+  //   if (typeof result === "string") { ctx.body = result; return; }
+  //   ctx.type = (<IMethodResult>result).type || "text/plain";
+  //   ctx.body = await (<IMethodResult>result).toString(configs);
+  // }
+  // console.log(Object.keys(sResult));
+  ctx.type = sResult.type || "text/plain";
+  ctx.body = await sResult.toString(configs);
 }
 
 function requestScopeStart(logger: Logger) {
   return async (ctx: KOAContext, next: () => Promise<any>) => {
     ctx.state["$$scopeId"] = UUID.Create();
     logger.debug(
-      "core", "requestScopeStart", `request start with scopeid : [${yellow(ctx.state["$$scopeId"])}]`);
+      "core", "requestScopeStart", `${blue(ctx.request.method)} ${cyan(ctx.request.url)} ${yellow(ctx.state["$$scopeId"].substring(0, 8))}`);
     await next();
   };
 }
