@@ -203,12 +203,13 @@ class BonbonsServer {
         this._mwares.unshift([handler, [this.$configs]]);
     }
     $$initLogger() {
+        const caller = "$$initLogger";
         const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(plugins_1.GLOBAL_LOGGER));
         const env = this.$confColls.get(di_1.ENV_MODE);
         this.$logger = new LoggerConstructor(env);
         this.singleton(plugins_1.Logger, () => this.$logger);
-        this.$logger.debug("core", this.$$initLogger.name, `logger init : [ type -> ${green(plugins_1.Logger.name)} ].`);
-        this.$logger.debug("core", this.$$initLogger.name, "-----------------------");
+        this.$logger.debug("core", caller, `logger init : [ type -> ${green(plugins_1.Logger.name)} ].`);
+        this.$logger.debug("core", caller, "-----------------------");
     }
     $$initDLookup() {
         this.$di = this.$confColls.get(di_1.DI_CONTAINER);
@@ -219,25 +220,26 @@ class BonbonsServer {
         }));
     }
     $$initDIContainer() {
-        this.$logger.debug("core", this.$$initDIContainer.name, "init DI container.");
-        this.$logger.debug("core", this.$$initDIContainer.name, `renew inject entry count : [ ${green(this._renews.length)} ].`);
+        const caller = "$$initDIContainer";
+        this.$logger.debug("core", caller, "init DI container.");
+        this.$logger.debug("core", caller, `renew inject entry count : [ ${green(this._renews.length)} ].`);
         this._renews.forEach(([tk, imp]) => {
             this.$$injectaFinally(tk, imp, private_api_1.InjectScope.New);
-            this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
+            this.$logger.trace("core", caller, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
-        this.$logger.debug("core", this.$$initDIContainer.name, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
+        this.$logger.debug("core", caller, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
         this._scopeds.forEach(([tk, imp]) => {
             this.$$injectaFinally(tk, imp, private_api_1.InjectScope.Scope);
-            this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
+            this.$logger.trace("core", caller, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
-        this.$logger.debug("core", this.$$initDIContainer.name, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
+        this.$logger.debug("core", caller, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
         this._singletons.forEach(([tk, imp]) => {
             this.$$injectaFinally(tk, imp, private_api_1.InjectScope.Singleton);
-            this.$logger.trace("core", this.$$initDIContainer.name, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
+            this.$logger.trace("core", caller, `relation add : [ @${cyan(tk.name)} -> @${blue(logInjectImp(imp))} ].`);
         });
         this.$di.complete();
-        this.$logger.debug("core", this.$$initDIContainer.name, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
-        this.$logger.debug("core", this.$$initDIContainer.name, "-----------------------");
+        this.$logger.debug("core", caller, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
+        this.$logger.debug("core", caller, "-----------------------");
     }
     $$preInject(provide, classType, type) {
         if (!provide)
@@ -262,13 +264,14 @@ class BonbonsServer {
         return this;
     }
     $$useRouters() {
-        this.$logger.debug("core", this.$$useRouters.name, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
+        const caller = "$$useRouters";
+        this.$logger.debug("core", caller, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
         const mainRouter = new private_api_1.KOARouter();
         this._ctlrs.forEach(controllerClass => {
             const proto = controllerClass.prototype;
             const { router } = (proto.getConfig && proto.getConfig());
             const thisRouter = new private_api_1.KOARouter({ prefix: router.prefix });
-            this.$logger.debug("core", this.$$useRouters.name, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${private_api_3.COLORS.green}${Object.keys(router.routes).length}${private_api_3.COLORS.reset} ]`);
+            this.$logger.debug("core", caller, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${private_api_3.COLORS.green}${Object.keys(router.routes).length}${private_api_3.COLORS.reset} ]`);
             Object.keys(router.routes).forEach(methodName => {
                 const item = router.routes[methodName];
                 const { allowMethods } = item;
@@ -278,19 +281,20 @@ class BonbonsServer {
             });
             mainRouter.use(thisRouter.routes()).use(thisRouter.allowedMethods());
         });
-        this.$logger.debug("core", this.$$useRouters.name, "app routers initialization completed.");
-        this.$logger.debug("core", this.$$useRouters.name, "-----------------------");
+        this.$logger.debug("core", caller, "app routers initialization completed.");
+        this.$logger.debug("core", caller, "-----------------------");
         const { routes, allowedMethods } = mainRouter;
         this.use(routes.bind(mainRouter));
         this.use(allowedMethods.bind(mainRouter));
     }
     $$resolveControllerMethod(method, item, ctor, name, router) {
+        const caller = "$$resolveControllerMethod";
         const { path, pipes, middlewares: mds } = item;
         if (!path)
             return;
         const { list: pipelist } = pipes;
         const { list: mdsList } = mds;
-        this.$logger.trace("core", this.$$resolveControllerMethod.name, `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
+        this.$logger.trace("core", caller, `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
         const middlewares = [...(mdsList || [])];
         const preMiddles = this.$$preparePipes();
         this.$$addPipeMiddlewares(pipelist, middlewares);
@@ -329,7 +333,7 @@ class BonbonsServer {
         }));
     }
     $$parseFuncParams(ctx, route) {
-        const querys = (route.funcParams || []).map(({ key, type, isQuery }) => {
+        const querys = (route.funcParams || []).filter(i => i.key !== null).map(({ key, type, isQuery }) => {
             const pack = isQuery ? ctx.query : ctx.params;
             return !type ? pack[key] : type(pack[key]);
         });
@@ -443,27 +447,27 @@ function controllerError(ctlr) {
 function resolveResult(ctx, result, configs, isSync) {
     return __awaiter(this, void 0, void 0, function* () {
         const isAsync = isSync === undefined ? utils_1.TypeCheck.isFromCustomClass(result || {}, Promise) : !isSync;
+        let sResult = result;
         if (isAsync) {
-            result.then(r => resolveResult(ctx, r, configs, true));
+            // (<Promise<SyncResult>>result).then(r => resolveResult(ctx, r, configs, true));
+            sResult = yield result;
         }
-        else {
-            if (!result) {
-                ctx.body = "";
-                return;
-            }
-            if (typeof result === "string") {
-                ctx.body = result;
-                return;
-            }
-            ctx.type = result.type || "text/plain";
-            ctx.body = yield result.toString(configs);
-        }
+        // else {
+        //   console.log(await (<any>result).toString(configs));
+        //   if (!result) { ctx.body = ""; return; }
+        //   if (typeof result === "string") { ctx.body = result; return; }
+        //   ctx.type = (<IMethodResult>result).type || "text/plain";
+        //   ctx.body = await (<IMethodResult>result).toString(configs);
+        // }
+        // console.log(Object.keys(sResult));
+        ctx.type = sResult.type || "text/plain";
+        ctx.body = yield sResult.toString(configs);
     });
 }
 function requestScopeStart(logger) {
     return (ctx, next) => __awaiter(this, void 0, void 0, function* () {
         ctx.state["$$scopeId"] = utils_1.UUID.Create();
-        logger.debug("core", "requestScopeStart", `request start with scopeid : [${yellow(ctx.state["$$scopeId"])}]`);
+        logger.debug("core", "requestScopeStart", `${blue(ctx.request.method)} ${cyan(ctx.request.url)} ${yellow(ctx.state["$$scopeId"].substring(0, 8))}`);
         yield next();
     });
 }
