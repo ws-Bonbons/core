@@ -216,6 +216,7 @@ class BonbonsServer {
         this.$rdi = { get: this.$di.get.bind(this.$di) };
         this.scoped(plugins_1.InjectService, (scopeId) => ({
             get: (token) => this.$rdi.get(token, scopeId),
+            INTERNAL_dispose: () => this.$di.dispose(scopeId),
             scopeId
         }));
     }

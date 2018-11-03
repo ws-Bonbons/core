@@ -582,8 +582,9 @@ export class BonbonsServer implements IServer {
     this.$di = this.$confColls.get(DI_CONTAINER);
     this.$rdi = { get: this.$di.get.bind(this.$di) };
     this.scoped(InjectService,
-      (scopeId: ScopeID) => ({
+      (scopeId?: ScopeID) => ({
         get: (token: InjectToken) => this.$rdi.get(token, scopeId),
+        INTERNAL_dispose: () => this.$di.dispose(scopeId),
         scopeId
       }));
   }
