@@ -241,18 +241,6 @@ class BonbonsServer {
         this.$logger.debug("core", caller, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
         this.$logger.debug("core", caller, "-----------------------");
     }
-    $$heackInjects(context, depts) {
-        const scopeId = context.state["$$scopeId"];
-        const injectIndex = (depts || []).indexOf(plugins_1.InjectService);
-        const all = this.$di.getDepedencies(depts, scopeId);
-        if (injectIndex >= 0) {
-            all[injectIndex] = {
-                get: (token) => this.$rdi.get(token, scopeId),
-                scopeId
-            };
-        }
-        return all;
-    }
     $$preInject(provide, classType, type) {
         if (!provide)
             return this;
@@ -322,7 +310,7 @@ class BonbonsServer {
     $$addPipeMiddlewares(pipelist, middlewares) {
         resolvePipeList(pipelist).forEach(bundle => middlewares.push((ctx, next) => __awaiter(this, void 0, void 0, function* () {
             const { target: pipe } = bundle;
-            const instance = private_api_4.createPipeInstance(bundle, this.$$heackInjects(ctx, private_api_2.getDependencies(pipe)) || [], getRequestContext(ctx));
+            const instance = private_api_4.createPipeInstance(bundle, this.$di.getDepedencies(private_api_2.getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
             yield instance.process();
             yield next();
         })));
@@ -336,7 +324,7 @@ class BonbonsServer {
     }
     $$decideFinalStep(route, middlewares, constructor, methodName) {
         middlewares.push((ctx) => __awaiter(this, void 0, void 0, function* () {
-            const list = this.$$heackInjects(ctx, private_api_2.getDependencies(constructor));
+            const list = this.$di.getDepedencies(private_api_2.getDependencies(constructor), ctx.state["$$scopeId"]);
             const c = new constructor(...list);
             c.$$ctx = getRequestContext(ctx);
             c.$$injector = this.$rdi;
