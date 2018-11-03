@@ -345,6 +345,7 @@ export declare class BonbonsServer implements IServer {
     private $$initLogger;
     private $$initDLookup;
     private $$initDIContainer;
+    private $$heackInjects;
     private $$preInject;
     private $$injectaFinally;
     private $$useRouters;
