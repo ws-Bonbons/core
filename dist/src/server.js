@@ -329,7 +329,9 @@ class BonbonsServer {
             c.$$ctx = getRequestContext(ctx);
             c.$$injector = this.$rdi;
             const result = constructor.prototype[methodName].bind(c)(...this.$$parseFuncParams(ctx, route));
-            yield resolveResult(ctx, result, this.$configs);
+            yield resolveResult(ctx, result, this.$configs, null, () => {
+                this.$di.dispose(ctx.state["$$scopeId"]);
+            });
         }));
     }
     $$parseFuncParams(ctx, route) {
@@ -444,24 +446,16 @@ function optionAssign(configs, token, newValue) {
 function controllerError(ctlr) {
     return utils_1.invalidParam("Controller to be add is invalid. You can only add the controller been decorated by @Controller(...).", { className: ctlr && ctlr.name });
 }
-function resolveResult(ctx, result, configs, isSync) {
+function resolveResult(ctx, result, configs, isSync, finalize) {
     return __awaiter(this, void 0, void 0, function* () {
-        const isAsync = isSync === undefined ? utils_1.TypeCheck.isFromCustomClass(result || {}, Promise) : !isSync;
+        const isAsync = isSync === null ? utils_1.TypeCheck.isFromCustomClass(result || {}, Promise) : !isSync;
         let sResult = result;
         if (isAsync) {
-            // (<Promise<SyncResult>>result).then(r => resolveResult(ctx, r, configs, true));
             sResult = yield result;
         }
-        // else {
-        //   console.log(await (<any>result).toString(configs));
-        //   if (!result) { ctx.body = ""; return; }
-        //   if (typeof result === "string") { ctx.body = result; return; }
-        //   ctx.type = (<IMethodResult>result).type || "text/plain";
-        //   ctx.body = await (<IMethodResult>result).toString(configs);
-        // }
-        // console.log(Object.keys(sResult));
         ctx.type = sResult.type || "text/plain";
         ctx.body = yield sResult.toString(configs);
+        finalize();
     });
 }
 function requestScopeStart(logger) {
