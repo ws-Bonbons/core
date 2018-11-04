@@ -344,6 +344,7 @@ export declare class BonbonsServer implements IServer {
     private $$useCommonOptions;
     private $$initLogger;
     private $$initDLookup;
+    private $$initContextProvider;
     private $$initDIContainer;
     private $$preInject;
     private $$injectaFinally;

@@ -478,6 +478,7 @@ export class BonbonsServer implements IServer {
     this.$$useCommonOptions();
     this.$$initLogger();
     this.$$initDLookup();
+    this.$$initContextProvider();
     this.$$initDIContainer();
     this.$$useRouters();
     this.$$useMiddlewares();
@@ -589,6 +590,13 @@ export class BonbonsServer implements IServer {
       }));
   }
 
+  private $$initContextProvider(): void {
+    this.scoped(Context, (scopeId?: ScopeID, { ctx = null } = {}) => {
+      if (ctx === null) throw invalidOperation("invalid call, you can only call a context in request pipe scope.");
+      return new Context(ctx);
+    });
+  }
+
   private $$initDIContainer(): void {
     const caller = "$$initDIContainer";
     this.$logger.debug("core", caller, "init DI container.");
@@ -672,7 +680,7 @@ export class BonbonsServer implements IServer {
     this.$$addPipeMiddlewares(pipelist, middlewares);
     this.$$selectFormParser(item, middlewares);
     this.$$decideFinalStep(item, middlewares, ctor, name);
-    this.$$selectFuncMethod(router, method)(path, ...[requestScopeStart(this.$logger), ...preMiddles, ...middlewares]);
+    this.$$selectFuncMethod(router, method)(path, ...[requestScopeStart(this.$logger, this.$di), ...preMiddles, ...middlewares]);
   }
 
   private $$preparePipes(): KOAMiddleware[] {
@@ -684,7 +692,8 @@ export class BonbonsServer implements IServer {
   private $$addPipeMiddlewares(pipelist: PipeEntry[], middlewares: ((context: KOAContext, next: () => Async<any>) => any)[]): void {
     resolvePipeList(pipelist).forEach(bundle => middlewares.push(async (ctx, next) => {
       const { target: pipe } = bundle;
-      const instance = createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], getRequestContext(ctx));
+      const context = this.$rdi.get(Context);
+      const instance = createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), ctx.state["$$scopeId"]) || [], context /* getRequestContext(ctx) */);
       await instance.process();
       await next();
     }));
@@ -702,7 +711,8 @@ export class BonbonsServer implements IServer {
     middlewares.push(async (ctx) => {
       const list = this.$di.getDepedencies(getDependencies(constructor), ctx.state["$$scopeId"]);
       const c = new constructor(...list);
-      c.$$ctx = getRequestContext(ctx);
+      // c.$$ctx = getRequestContext(ctx);
+      c.$$ctx = this.$rdi.get(Context);
       c.$$injector = this.$rdi;
       const result: IResult = constructor.prototype[methodName].bind(c)(...this.$$parseFuncParams(ctx, route));
       await resolveResult(ctx, result, this.$configs, null, () => {
@@ -757,9 +767,9 @@ function logInjectImp(imp: any) {
   return "[instance]";
 }
 
-function getRequestContext(ctx: KOAContext) {
-  return ctx.state["$$ctx"] || (ctx.state["$$ctx"] = new Context(ctx));
-}
+// function getRequestContext(ctx: KOAContext) {
+//   return ctx.state["$$ctx"] || (ctx.state["$$ctx"] = new Context(ctx));
+// }
 
 function resolvePipeList(list: PipeEntry[]) {
   return (list || []).map(ele => {
@@ -840,9 +850,13 @@ async function resolveResult(ctx: KOAContext, result: IResult, configs: ConfigsC
   finalize();
 }
 
-function requestScopeStart(logger: Logger) {
+function requestScopeStart(logger: Logger, di: SourceDI) {
   return async (ctx: KOAContext, next: () => Promise<any>) => {
-    ctx.state["$$scopeId"] = UUID.Create();
+    const scopeId = ctx.state["$$scopeId"] = UUID.Create();
+    // @ts-ignore
+    console.log(Object.getOwnPropertyNames(di.__proto__.__proto__));
+    // @ts-ignore
+    di.createScope(scopeId, { ctx });
     logger.debug(
       "core", "requestScopeStart", `${blue(ctx.request.method)} ${cyan(ctx.request.url)} ${yellow(ctx.state["$$scopeId"].substring(0, 8))}`);
     await next();
