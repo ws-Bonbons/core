@@ -319,8 +319,9 @@ class BonbonsServer {
     $$addPipeMiddlewares(pipelist, middlewares) {
         resolvePipeList(pipelist).forEach(bundle => middlewares.push((ctx, next) => __awaiter(this, void 0, void 0, function* () {
             const { target: pipe } = bundle;
-            const context = this.$rdi.get(controllers_1.Context);
-            const instance = private_api_4.createPipeInstance(bundle, this.$di.getDepedencies(private_api_2.getDependencies(pipe), ctx.state["$$scopeId"]) || [], context /* getRequestContext(ctx) */);
+            const scopeId = ctx.state["$$scopeId"];
+            const context = this.$rdi.get(controllers_1.Context, scopeId);
+            const instance = private_api_4.createPipeInstance(bundle, this.$di.getDepedencies(private_api_2.getDependencies(pipe), scopeId) || [], context /* getRequestContext(ctx) */);
             yield instance.process();
             yield next();
         })));
@@ -334,14 +335,15 @@ class BonbonsServer {
     }
     $$decideFinalStep(route, middlewares, constructor, methodName) {
         middlewares.push((ctx) => __awaiter(this, void 0, void 0, function* () {
-            const list = this.$di.getDepedencies(private_api_2.getDependencies(constructor), ctx.state["$$scopeId"]);
+            const scopeId = ctx.state["$$scopeId"];
+            const list = this.$di.getDepedencies(private_api_2.getDependencies(constructor), scopeId);
             const c = new constructor(...list);
             // c.$$ctx = getRequestContext(ctx);
-            c.$$ctx = this.$rdi.get(controllers_1.Context);
+            c.$$ctx = this.$rdi.get(controllers_1.Context, scopeId);
             c.$$injector = this.$rdi;
             const result = constructor.prototype[methodName].bind(c)(...this.$$parseFuncParams(ctx, route));
             yield resolveResult(ctx, result, this.$configs, null, () => {
-                this.$di.dispose(ctx.state["$$scopeId"]);
+                this.$di.dispose(scopeId);
             });
         }));
     }
@@ -472,9 +474,6 @@ function resolveResult(ctx, result, configs, isSync, finalize) {
 function requestScopeStart(logger, di) {
     return (ctx, next) => __awaiter(this, void 0, void 0, function* () {
         const scopeId = ctx.state["$$scopeId"] = utils_1.UUID.Create();
-        // @ts-ignore
-        console.log(Object.getOwnPropertyNames(di.__proto__.__proto__));
-        // @ts-ignore
         di.createScope(scopeId, { ctx });
         logger.debug("core", "requestScopeStart", `${blue(ctx.request.method)} ${cyan(ctx.request.url)} ${yellow(ctx.state["$$scopeId"].substring(0, 8))}`);
         yield next();
