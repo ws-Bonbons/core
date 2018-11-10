@@ -3,6 +3,7 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
+__export(require("@bonbons/contracts"));
 __export(require("./utils/public-api"));
 __export(require("./di/public-api"));
 __export(require("./pipes/public-api"));
