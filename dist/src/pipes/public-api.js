@@ -16,6 +16,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
  */
 class PipeMiddleware {
     constructor() { }
+    break() {
+        return { breakOut: true };
+    }
 }
 exports.PipeMiddleware = PipeMiddleware;
 /**

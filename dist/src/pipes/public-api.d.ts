@@ -19,6 +19,7 @@ export declare abstract class PipeMiddleware<T = any> implements c.IPipe<T> {
     constructor();
     readonly context: c.IBonbonsContext;
     abstract process(): Async<c.PipeProcessResult>;
+    protected break(): c.PipeProcessResult;
 }
 /**
  * Bonbons Pipe Factory Generator

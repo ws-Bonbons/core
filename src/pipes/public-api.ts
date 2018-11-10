@@ -20,6 +20,9 @@ export abstract class PipeMiddleware<T = any> implements c.IPipe<T> {
   constructor() { }
   public readonly context!: c.IBonbonsContext;
   abstract process(): Async<c.PipeProcessResult>;
+  protected break(): c.PipeProcessResult {
+    return { breakOut: true };
+  }
 }
 
 /**
