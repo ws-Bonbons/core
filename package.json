@@ -25,7 +25,8 @@
     "ejs": "^2.6.1",
     "iconv-lite": "0.4.23",
     "lodash": "4.17.11",
-    "reflect-metadata": "0.1.12"
+    "reflect-metadata": "0.1.12",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/camelcase": "4.1.0",
@@ -35,7 +36,7 @@
     "@types/koa-router": "7.0.28",
     "@types/lodash": "4.14.118",
     "@types/node": "10.3.2",
-    "@types/uuid": "3.4.3",
+    "@types/uuid": "^3.4.4",
     "copy-webpack-plugin": "4.5.2",
     "ts-loader": "4.4.1",
     "tslint": "5.10.0",
