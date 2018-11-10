@@ -8,36 +8,6 @@
       ],
       "@bonbons/contracts/dist/src/private-api": [
         "./../contracts/src/private-api.ts"
-      ],
-      "@bonbons/di": [
-        "./../di/index.ts"
-      ],
-      "@bonbons/di/dist/src/private-api": [
-        "./../di/src/private-api.ts"
-      ],
-      "@bonbons/plugins": [
-        "./../plugins/index.ts"
-      ],
-      "@bonbons/plugins/dist/src/private-api": [
-        "./../plugins/src/private-api.ts"
-      ],
-      "@bonbons/pipes": [
-        "./../pipes/index.ts"
-      ],
-      "@bonbons/pipes/dist/src/private-api": [
-        "./../pipes/src/private-api.ts"
-      ],
-      "@bonbons/utils": [
-        "./../utils/index.ts"
-      ],
-      "@bonbons/options": [
-        "./../options/index.ts"
-      ],
-      "@bonbons/decorators": [
-        "./../decorators/index.ts"
-      ],
-      "@bonbons/controllers": [
-        "./../controllers/index.ts"
       ]
     }
   }
