@@ -3,12 +3,12 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("@bonbons/pipes"));
-__export(require("@bonbons/plugins"));
 __export(require("@bonbons/controllers"));
 __export(require("@bonbons/decorators"));
 __export(require("./utils/public-api"));
 __export(require("./di/public-api"));
+__export(require("./pipes/public-api"));
+__export(require("./plugins/public-api"));
 const server_1 = require("./server");
 exports.Server = server_1.BonbonsServer;
 exports.BaseApp = server_1.BaseApp;

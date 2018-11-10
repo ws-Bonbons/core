@@ -9,15 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const private_api_1 = require("@bonbons/contracts/dist/src/private-api");
-const private_api_2 = require("@bonbons/plugins/dist/src/private-api");
-const private_api_3 = require("@bonbons/pipes/dist/src/private-api");
+const plugins_1 = require("./plugins");
+const pipes_1 = require("./pipes");
 const di_1 = require("./di");
-const utils_1 = require("@bonbons/utils");
+const utils_1 = require("./utils");
 const controllers_1 = require("@bonbons/controllers");
 const options_1 = require("./options");
-const plugins_1 = require("@bonbons/plugins");
+const public_api_1 = require("./plugins/public-api");
 const decorators_1 = require("@bonbons/decorators");
-const { red, green, yellow, cyan, blue, magenta } = private_api_2.ColorsHelper;
+const { red, green, yellow, cyan, blue, magenta } = plugins_1.ColorsHelper;
 class BaseApp {
     get config() { return this["_configs"]; }
     start() { }
@@ -130,8 +130,8 @@ class BonbonsServer {
         // console.log(this._configs);
     }
     $$afterRun() {
-        const { compilerFactory: factory } = this.$confColls.get(plugins_1.TPL_RENDER_COMPILER);
-        this.option(plugins_1.TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
+        const { compilerFactory: factory } = this.$confColls.get(public_api_1.TPL_RENDER_COMPILER);
+        this.option(public_api_1.TPL_RENDER_COMPILER, { compiler: factory && factory(this.$configs) });
     }
     _clearServer() {
         delete this.$app;
@@ -176,13 +176,13 @@ class BonbonsServer {
         this.option(di_1.DEPLOY_MODE, options_1.Options.deploy);
         this.option(di_1.CONFIG_COLLECTION, this.$confColls);
         this.option(di_1.DI_CONTAINER, new di_1.DIContainer());
-        this.option(plugins_1.FILE_LOADER, plugins_1.defaultFileLoaderOptions);
-        this.option(plugins_1.TPL_RENDER_COMPILER, plugins_1.defaultTplRenderCompilerOptions);
-        this.option(plugins_1.ERROR_HANDLER, plugins_1.defaultErrorHandler);
-        this.option(plugins_1.ERROR_PAGE_TEMPLATE, plugins_1.defaultErrorPageTemplate);
-        this.option(plugins_1.ERROR_RENDER_OPRIONS, plugins_1.defaultErrorPageRenderOptions);
-        this.option(plugins_1.TPL_RENDER_OPTIONS, plugins_1.defaultViewTplRenderOptions);
-        this.option(plugins_1.GLOBAL_LOGGER, private_api_2.BonbonsLogger);
+        this.option(public_api_1.FILE_LOADER, public_api_1.defaultFileLoaderOptions);
+        this.option(public_api_1.TPL_RENDER_COMPILER, public_api_1.defaultTplRenderCompilerOptions);
+        this.option(public_api_1.ERROR_HANDLER, public_api_1.defaultErrorHandler);
+        this.option(public_api_1.ERROR_PAGE_TEMPLATE, public_api_1.defaultErrorPageTemplate);
+        this.option(public_api_1.ERROR_RENDER_OPRIONS, public_api_1.defaultErrorPageRenderOptions);
+        this.option(public_api_1.TPL_RENDER_OPTIONS, public_api_1.defaultViewTplRenderOptions);
+        this.option(public_api_1.GLOBAL_LOGGER, plugins_1.BonbonsLogger);
         this.option(di_1.STATIC_TYPED_RESOLVER, utils_1.TypedSerializer);
         this.option(di_1.JSON_RESULT_OPTIONS, options_1.Options.jsonResult);
         this.option(di_1.STRING_RESULT_OPTIONS, options_1.Options.stringResult);
@@ -197,24 +197,24 @@ class BonbonsServer {
         const { port } = this.$confColls.get(di_1.DEPLOY_MODE);
         this.$port = port || 3000;
         this.$configs = { get: this.$confColls.get.bind(this.$confColls) };
-        this.singleton(plugins_1.ConfigService, () => this.$configs);
-        this.singleton(plugins_1.RenderService, () => new plugins_1.BonbonsRender(this.$configs));
-        const handler = this.$confColls.get(plugins_1.ERROR_HANDLER);
+        this.singleton(public_api_1.ConfigService, () => this.$configs);
+        this.singleton(public_api_1.RenderService, () => new public_api_1.BonbonsRender(this.$configs));
+        const handler = this.$confColls.get(public_api_1.ERROR_HANDLER);
         this._mwares.unshift([handler, [this.$configs]]);
     }
     $$initLogger() {
         const caller = "$$initLogger";
-        const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(plugins_1.GLOBAL_LOGGER));
+        const LoggerConstructor = decorators_1.Injectable()(this.$confColls.get(public_api_1.GLOBAL_LOGGER));
         const env = this.$confColls.get(di_1.ENV_MODE);
         this.$logger = new LoggerConstructor(env);
-        this.singleton(plugins_1.Logger, () => this.$logger);
-        this.$logger.debug("core", caller, `logger init : [ type -> ${green(plugins_1.Logger.name)} ].`);
+        this.singleton(public_api_1.Logger, () => this.$logger);
+        this.$logger.debug("core", caller, `logger init : [ type -> ${green(public_api_1.Logger.name)} ].`);
         this.$logger.debug("core", caller, "-----------------------");
     }
     $$initDLookup() {
         this.$di = this.$confColls.get(di_1.DI_CONTAINER);
         this.$rdi = { get: this.$di.get.bind(this.$di) };
-        this.scoped(plugins_1.InjectService, (scopeId) => ({
+        this.scoped(public_api_1.InjectService, (scopeId) => ({
             get: (token) => this.$rdi.get(token, scopeId),
             INTERNAL_dispose: () => this.$di.dispose(scopeId),
             scopeId
@@ -279,7 +279,7 @@ class BonbonsServer {
             const proto = controllerClass.prototype;
             const { router } = (proto.getConfig && proto.getConfig());
             const thisRouter = new private_api_1.KOARouter({ prefix: router.prefix });
-            this.$logger.debug("core", caller, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${private_api_2.COLORS.green}${Object.keys(router.routes).length}${private_api_2.COLORS.reset} ]`);
+            this.$logger.debug("core", caller, `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${plugins_1.COLORS.green}${Object.keys(router.routes).length}${plugins_1.COLORS.reset} ]`);
             Object.keys(router.routes).forEach(methodName => {
                 const item = router.routes[methodName];
                 const { allowMethods } = item;
@@ -320,7 +320,7 @@ class BonbonsServer {
             const { target: pipe } = bundle;
             const scopeId = ctx.state["$$scopeId"];
             const context = this.$rdi.get(controllers_1.Context, scopeId);
-            const instance = private_api_3.createPipeInstance(bundle, this.$di.getDepedencies(di_1.getDependencies(pipe), scopeId) || [], context /* getRequestContext(ctx) */);
+            const instance = pipes_1.createPipeInstance(bundle, this.$di.getDepedencies(di_1.getDependencies(pipe), scopeId) || [], context /* getRequestContext(ctx) */);
             yield instance.process();
             yield next();
         })));

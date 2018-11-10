@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const server_1 = require("./server");
-const di_1 = require("@bonbons/di");
-const public_api_1 = require("@bonbons/plugins/dist/src/public-api");
+const di_1 = require("./di");
+const public_api_1 = require("./plugins/public-api");
 /**
  * Create a Bonbons.koa App server
  * ---

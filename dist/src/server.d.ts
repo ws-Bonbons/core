@@ -1,7 +1,7 @@
 import { BonbonsConfigCollection as SourceConfigs, InjectableToken as IJTK, BonbonsDeptFactory as IJTFC, ImplementToken as IMPK, BonbonsEntry as Entry, BonbonsToken as Token, IBonbonsServer as IServer, BonbonsServerConfig as ServerConfig, BonbonsPipeEntry as PipeEntry, MiddlewaresFactory } from "@bonbons/contracts/dist/src/private-api";
 import { Constructor } from "@bonbons/contracts";
 import { ConfigsCollection } from "./di";
-import { Logger } from "@bonbons/plugins";
+import { Logger } from "./plugins/public-api";
 export declare abstract class BaseApp {
     protected readonly logger: Logger;
     protected readonly config: ConfigsCollection;

@@ -36,8 +36,8 @@ import {
   ColorsHelper,
   COLORS,
   BonbonsLogger
-} from "@bonbons/plugins/dist/src/private-api";
-import { createPipeInstance } from "@bonbons/pipes/dist/src/private-api";
+} from "./plugins";
+import { createPipeInstance } from "./pipes";
 import {
   Constructor,
   Async,
@@ -60,7 +60,7 @@ import {
   DIContainer,
   getDependencies
 } from "./di";
-import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "@bonbons/utils";
+import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "./utils";
 import { Context } from "@bonbons/controllers";
 import { Options as DEFAULTS } from "./options";
 import {
@@ -82,7 +82,7 @@ import {
   BonbonsRender,
   FILE_LOADER,
   defaultFileLoaderOptions
-} from "@bonbons/plugins";
+} from "./plugins/public-api";
 import { Injectable } from "@bonbons/decorators";
 
 const { red, green, yellow, cyan, blue, magenta } = ColorsHelper;
