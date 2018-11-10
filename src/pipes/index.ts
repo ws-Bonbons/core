@@ -1,6 +1,6 @@
 import { IBonbonsContext, IPipeBundle, IPipe } from "@bonbons/contracts/dist/src/private-api";
-import { Reflection } from "@bonbons/di/dist/src/private-api";
-import { clone } from "@bonbons/utils";
+import { Reflection } from "../di";
+import { clone } from "../utils";
 
 export function createPipeInstance<T extends IPipe>(type: IPipeBundle<T>, depts: any[], $$ctx?: IBonbonsContext) {
   const { target, params } = type;

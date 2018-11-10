@@ -8,10 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const di_1 = require("@bonbons/di");
+const di_1 = require("../../di");
 const logger_1 = require("./logger");
 const render_1 = require("./render");
-const utils_1 = require("@bonbons/utils");
+const utils_1 = require("../../utils");
 const fileLoader_1 = require("./fileLoader");
 const injector_1 = require("./injector");
 let tplHanderCache;

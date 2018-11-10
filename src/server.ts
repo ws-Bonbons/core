@@ -61,7 +61,7 @@ import {
   getDependencies
 } from "./di";
 import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "./utils";
-import { Context } from "@bonbons/controllers";
+import { Context } from "./controllers";
 import { Options as DEFAULTS } from "./options";
 import {
   Logger,
@@ -83,7 +83,7 @@ import {
   FILE_LOADER,
   defaultFileLoaderOptions
 } from "./plugins/public-api";
-import { Injectable } from "@bonbons/decorators";
+import { Injectable } from "./decorators";
 
 const { red, green, yellow, cyan, blue, magenta } = ColorsHelper;
 

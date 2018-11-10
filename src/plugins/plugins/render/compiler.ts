@@ -1,7 +1,7 @@
-import { ConfigsCollection } from "@bonbons/di";
+import { ConfigsCollection } from "../../../di";
 import { FILE_LOADER } from "../fileLoader";
 import { TPL_RENDER_OPTIONS, TplRendeInvoker } from "./base";
-import { invalidOperation } from "@bonbons/utils";
+import { invalidOperation } from "../../../utils";
 
 function defaultTplRenderCompiler(configs: ConfigsCollection): TplRendeInvoker {
   const { render, cache, root, extensions, options: defaultOptions } = configs.get(TPL_RENDER_OPTIONS);

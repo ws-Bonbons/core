@@ -1,7 +1,5 @@
 /// <reference types="node" />
-/// <reference types="koa" />
-/// <reference types="koa-router" />
-import { BonbonsToken, ConfigsCollection } from "@bonbons/di";
+import { BonbonsToken, ConfigsCollection } from "../../di";
 import * as c from "@bonbons/contracts/dist/src/private-api";
 import { ViewTplRenderOptions } from "./render";
 import { ConfigService } from "./configs";

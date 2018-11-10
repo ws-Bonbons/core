@@ -1,6 +1,6 @@
 import { defaultViewTplRender } from "./simple.render";
 import { ejsViewTplRender } from "./ejs.render";
-import { ConfigsCollection } from "@bonbons/di";
+import { ConfigsCollection } from "../../../di";
 export { defaultViewTplRender };
 export declare const defaultViewTplRenderOptions: {
     render: typeof defaultViewTplRender;

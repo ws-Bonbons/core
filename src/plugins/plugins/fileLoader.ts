@@ -1,6 +1,6 @@
 import * as iconv from "iconv-lite";
 import { default as fs } from "fs";
-import { createToken, BonbonsToken } from "@bonbons/di";
+import { createToken, BonbonsToken } from "../../di";
 
 export interface FileLoaderOptions {
   stringLoader?(filename: string, options?: { root?: string, encode?: string }): Promise<string>;

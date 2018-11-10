@@ -1,6 +1,6 @@
-import { createToken, BonbonsToken as Token } from "@bonbons/di";
+import { createToken, BonbonsToken as Token } from "../../di";
 import { Constructor } from "@bonbons/contracts";
-import { Colors, setColor } from "@bonbons/utils";
+import { Colors, setColor } from "../../utils";
 import { IENV } from "@bonbons/contracts/dist/src/private-api";
 
 export const GLOBAL_LOGGER: Token<Constructor<GlobalLogger>> = createToken<Constructor<GlobalLogger>>("GLOBAL_LOGGER");

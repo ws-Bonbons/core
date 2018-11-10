@@ -1,8 +1,11 @@
 "use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
-const server_1 = require("./server");
-const di_1 = require("./di");
-const public_api_1 = require("./plugins/public-api");
+const server_1 = require("../server");
+const di_1 = require("../di");
+const public_api_1 = require("../plugins/public-api");
 /**
  * Create a Bonbons.koa App server
  * ---
@@ -28,6 +31,9 @@ function BonbonsApp(config) {
     };
 }
 exports.BonbonsApp = BonbonsApp;
-/** Create a Bonbons.koa App server */
-exports.BKoa = BonbonsApp;
-//# sourceMappingURL=decorator.js.map
+__export(require("./controller"));
+__export(require("./injectable"));
+__export(require("./method"));
+__export(require("./forms"));
+__export(require("./pipe"));
+//# sourceMappingURL=index.js.map

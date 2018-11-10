@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const iconv = __importStar(require("iconv-lite"));
 const fs_1 = __importDefault(require("fs"));
-const di_1 = require("@bonbons/di");
+const di_1 = require("../../di");
 exports.FILE_LOADER = di_1.createToken("FILE_LOADER");
 function defaultStringFileLoader(filename, { root = undefined, encode = "utf8" } = {}) {
     return new Promise((resolve, reject) => {

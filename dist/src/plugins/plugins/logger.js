@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const di_1 = require("@bonbons/di");
-const utils_1 = require("@bonbons/utils");
+const di_1 = require("../../di");
+const utils_1 = require("../../utils");
 exports.GLOBAL_LOGGER = di_1.createToken("GLOBAL_LOGGER");
 class GlobalLogger {
     constructor(env) { }

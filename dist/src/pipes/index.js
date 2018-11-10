@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const private_api_1 = require("@bonbons/di/dist/src/private-api");
-const utils_1 = require("@bonbons/utils");
+const di_1 = require("../di");
+const utils_1 = require("../utils");
 function createPipeInstance(type, depts, $$ctx) {
     const { target, params } = type;
-    const { keyMatch } = private_api_1.Reflection.GetPipeMetadata(target.prototype);
+    const { keyMatch } = di_1.Reflection.GetPipeMetadata(target.prototype);
     const initFn = target.prototype.pipeOnInit;
     const instance = new target(...depts);
     instance.context = $$ctx;

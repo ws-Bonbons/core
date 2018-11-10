@@ -10,7 +10,7 @@ import {
   BonbonsDIContainer,
 } from "./declares";
 import { DIScopePool } from "./scope-pool";
-import { TypeCheck, setColor } from "@bonbons/utils";
+import { TypeCheck, setColor } from "../../utils";
 
 type DeptNode = DIContainerEntry<any>;
 

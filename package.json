@@ -20,11 +20,11 @@
   "homepage": "https://github.com/ws-Bonbons/core#readme",
   "dependencies": {
     "@bonbons/contracts": "^1.2.2",
-    "@bonbons/controllers": "^1.2.4",
-    "@bonbons/decorators": "^1.2.2",
-    "cerialize": "^0.1.18",
+    "cerialize": "0.1.18",
     "decamelize": "2.0.0",
-    "lodash": "^4.17.11",
+    "ejs": "^2.6.1",
+    "iconv-lite": "0.4.23",
+    "lodash": "4.17.11",
     "reflect-metadata": "0.1.12"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "@types/koa": "2.0.46",
     "@types/koa-bodyparser": "4.2.0",
     "@types/koa-router": "7.0.28",
-    "@types/lodash": "4.14.112",
+    "@types/lodash": "4.14.118",
     "@types/node": "10.3.2",
     "@types/uuid": "3.4.3",
     "copy-webpack-plugin": "4.5.2",

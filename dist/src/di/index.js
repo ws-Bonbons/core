@@ -3,11 +3,11 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./di/container"));
-__export(require("./di/declares"));
-__export(require("./di/di-base"));
-__export(require("./di/scope-pool"));
-__export(require("./di/config"));
-__export(require("./di/reflect"));
-__export(require("./di/tokens"));
+__export(require("./core/container"));
+__export(require("./core/declares"));
+__export(require("./core/di-base"));
+__export(require("./core/scope-pool"));
+__export(require("./core/config"));
+__export(require("./core/reflect"));
+__export(require("./core/tokens"));
 //# sourceMappingURL=index.js.map

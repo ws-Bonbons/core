@@ -1,6 +1,6 @@
 import { defaultViewTplRender } from "./simple.render";
 import { ejsViewTplRender } from "./ejs.render";
-import { ConfigsCollection } from "@bonbons/di";
+import { ConfigsCollection } from "../../../di";
 import { TPL_RENDER_COMPILER } from "./base";
 
 export { defaultViewTplRender };

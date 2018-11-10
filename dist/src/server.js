@@ -13,10 +13,10 @@ const plugins_1 = require("./plugins");
 const pipes_1 = require("./pipes");
 const di_1 = require("./di");
 const utils_1 = require("./utils");
-const controllers_1 = require("@bonbons/controllers");
+const controllers_1 = require("./controllers");
 const options_1 = require("./options");
 const public_api_1 = require("./plugins/public-api");
-const decorators_1 = require("@bonbons/decorators");
+const decorators_1 = require("./decorators");
 const { red, green, yellow, cyan, blue, magenta } = plugins_1.ColorsHelper;
 class BaseApp {
     get config() { return this["_configs"]; }

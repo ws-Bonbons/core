@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const fileLoader_1 = require("../fileLoader");
 const base_1 = require("./base");
-const utils_1 = require("@bonbons/utils");
+const utils_1 = require("../../../utils");
 function defaultTplRenderCompiler(configs) {
     const { render, cache, root, extensions, options: defaultOptions } = configs.get(base_1.TPL_RENDER_OPTIONS);
     const { stringLoader: loader } = configs.get(fileLoader_1.FILE_LOADER);

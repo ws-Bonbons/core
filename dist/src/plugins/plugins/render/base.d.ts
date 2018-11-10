@@ -1,4 +1,4 @@
-import { ConfigsCollection, BonbonsToken } from "@bonbons/di";
+import { ConfigsCollection, BonbonsToken } from "../../../di";
 export interface RenderFunction<TOptions = any> {
     (tpl: string, data?: any, options?: TOptions): string | undefined;
 }

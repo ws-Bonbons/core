@@ -1,8 +1,8 @@
-import { createToken, ENV_MODE, DI_CONTAINER, BonbonsToken, ConfigsCollection } from "@bonbons/di";
+import { createToken, ENV_MODE, DI_CONTAINER, BonbonsToken, ConfigsCollection } from "../../di";
 import * as c from "@bonbons/contracts/dist/src/private-api";
 import { GlobalLogger } from "./logger";
 import { ViewTplRenderOptions, defaultViewTplRender, CompiledRenderFunction } from "./render";
-import { invalidOperation, BonbonsGlobal as GLOBAL } from "@bonbons/utils";
+import { invalidOperation, BonbonsGlobal as GLOBAL } from "../../utils";
 import { FILE_LOADER } from "./fileLoader";
 import { ConfigService } from "./configs";
 import { InjectService } from "./injector";

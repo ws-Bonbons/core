@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { BonbonsToken } from "@bonbons/di";
+import { BonbonsToken } from "../../di";
 export interface FileLoaderOptions {
     stringLoader?(filename: string, options?: {
         root?: string;
