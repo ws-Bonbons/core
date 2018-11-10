@@ -321,8 +321,19 @@ class BonbonsServer {
             const scopeId = ctx.state["$$scopeId"];
             const context = this.$rdi.get(controllers_1.Context, scopeId);
             const instance = pipes_1.createPipeInstance(bundle, this.$di.getDepedencies(di_1.getDependencies(pipe), scopeId) || [], context /* getRequestContext(ctx) */);
-            yield instance.process();
-            yield next();
+            const result = yield instance.process();
+            if (result) {
+                if (result.breakOut === true) {
+                    if (result.error)
+                        throw result.error;
+                }
+                else {
+                    yield next();
+                }
+            }
+            else {
+                yield next();
+            }
         })));
     }
     $$useMiddlewares() {

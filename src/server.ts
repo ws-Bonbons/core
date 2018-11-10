@@ -696,8 +696,16 @@ export class BonbonsServer implements IServer {
       const scopeId = ctx.state["$$scopeId"];
       const context = this.$rdi.get(Context, scopeId);
       const instance = createPipeInstance(bundle, this.$di.getDepedencies(getDependencies(pipe), scopeId) || [], context /* getRequestContext(ctx) */);
-      await instance.process();
-      await next();
+      const result = await instance.process();
+      if (result) {
+        if (result.breakOut === true) {
+          if (result.error) throw result.error;
+        } else {
+          await next();
+        }
+      } else {
+        await next();
+      }
     }));
   }
 
