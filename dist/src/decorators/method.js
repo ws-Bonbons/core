@@ -86,7 +86,7 @@ function Route(path) {
     };
 }
 exports.Route = Route;
-function Pipes(pipes, merge = true) {
+function Pipes(pipes, merge = false) {
     return function (target, propertyKey) {
         if (propertyKey) {
             const reflect = d.Reflection.GetControllerMetadata(target);
@@ -102,7 +102,7 @@ function Pipes(pipes, merge = true) {
     };
 }
 exports.Pipes = Pipes;
-function Middlewares(middlewares, merge = true) {
+function Middlewares(middlewares, merge = false) {
     return function (target, propertyKey) {
         if (propertyKey) {
             const reflect = d.Reflection.GetControllerMetadata(target);

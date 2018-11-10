@@ -87,7 +87,7 @@ type PipesDecorator = <T>(target: Constructor<T> | T, propertyKey?: string) => v
 
 export function Pipes(pipes: c.BonbonsPipeEntry[]): PipesDecorator;
 export function Pipes(pipes: c.BonbonsPipeEntry[], merge: boolean): PipesMethodDecorator;
-export function Pipes(pipes: c.BonbonsPipeEntry[], merge = true) {
+export function Pipes(pipes: c.BonbonsPipeEntry[], merge = false) {
   return function <T>(target: Constructor<T> | T, propertyKey?: string) {
     if (propertyKey) {
       const reflect = d.Reflection.GetControllerMetadata((<T>target));
@@ -104,7 +104,7 @@ export function Pipes(pipes: c.BonbonsPipeEntry[], merge = true) {
 
 export function Middlewares(middlewares: c.KOAMiddleware[]): PipesDecorator;
 export function Middlewares(middlewares: c.KOAMiddleware[], merge: boolean): PipesMethodDecorator;
-export function Middlewares(middlewares: c.KOAMiddleware[], merge = true) {
+export function Middlewares(middlewares: c.KOAMiddleware[], merge = false) {
   return function <T>(target: Constructor<T> | T, propertyKey?: string) {
     if (propertyKey) {
       const reflect = d.Reflection.GetControllerMetadata((<T>target));
