@@ -1,5 +1,5 @@
 import path from "path";
-import { BonbonsGlobal } from "../utils";
+import { BonbonsGlobal } from "./src/utils";
 
 BonbonsGlobal.folderRoot = path.resolve(__dirname);
 

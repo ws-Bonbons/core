@@ -1,5 +1,6 @@
 /// <reference types="koa" />
 /// <reference types="koa-bodyparser" />
+/// <reference types="koa-router" />
 import { IBonbonsContext, KOARequest, KOAResponse, KOAContext } from "@bonbons/contracts/dist/src/private-api";
 export declare class Context implements IBonbonsContext {
     private source;

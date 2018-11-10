@@ -3,5 +3,5 @@ import { Implement, InjectScope, InjectToken, DIContainerEntry } from "./declare
 export declare type Scope = InjectScope;
 export declare class DIContainer extends BaseDIContainer {
     register<K, V>(token: InjectToken<K>, imp: Implement<V>, scope: InjectScope): void;
-    createFactory<T>(item: DIContainerEntry<T>): import("../../../../utils/node_modules/@bonbons/contracts/dist/src/contracts/injectable").ImplementFactory<any>;
+    createFactory<T>(item: DIContainerEntry<T>): import("@bonbons/contracts/dist/src/contracts/injectable").ImplementFactory<any>;
 }

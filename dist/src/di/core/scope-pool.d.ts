@@ -1,3 +1,5 @@
+/// <reference types="koa" />
+/// <reference types="koa-router" />
 import { InjectToken } from "./declares";
 import { KOAContext } from "@bonbons/contracts/dist/src/private-api";
 export declare class DIScopePool {
