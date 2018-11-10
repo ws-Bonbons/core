@@ -34,8 +34,8 @@ function registerCompelete(meta: c.IBonbonsControllerMetadata) {
   Object.keys(meta.router.routes).map(key => meta.router.routes[key]).forEach(route => {
     const { middlewares: mms, pipes: mps } = meta;
     const {
-      middlewares = { list: [], merge: false },
-      pipes = { list: [], merge: false }
+      middlewares = { list: [], merge: true },
+      pipes = { list: [], merge: true }
     } = route;
     if (middlewares.merge) {
       route.middlewares.list = [...mms, ...middlewares.list];
