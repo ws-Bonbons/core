@@ -28,6 +28,9 @@ function registerCompelete(meta) {
     Object.keys(meta.router.routes).map(key => meta.router.routes[key]).forEach(route => {
         const { middlewares: mms, pipes: mps } = meta;
         const { middlewares = { list: [], merge: true }, pipes = { list: [], merge: true } } = route;
+        // try make sure the item is exist.
+        route.middlewares = middlewares;
+        route.pipes = pipes;
         if (middlewares.merge) {
             route.middlewares.list = [...mms, ...middlewares.list];
         }

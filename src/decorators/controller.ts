@@ -37,6 +37,9 @@ function registerCompelete(meta: c.IBonbonsControllerMetadata) {
       middlewares = { list: [], merge: true },
       pipes = { list: [], merge: true }
     } = route;
+    // try make sure the item is exist.
+    route.middlewares = middlewares;
+    route.pipes = pipes;
     if (middlewares.merge) {
       route.middlewares.list = [...mms, ...middlewares.list];
     } else {
