@@ -1,10 +1,10 @@
 export * from "@bonbons/contracts";
-export * from "@bonbons/di/dist";
 export * from "@bonbons/pipes";
 export * from "@bonbons/plugins";
-export * from "@bonbons/options";
 export * from "@bonbons/controllers";
 export * from "@bonbons/decorators";
+export * from "./utils/public-api";
+export * from "./di/public-api";
 import { BonbonsServer, BaseApp } from "./server";
 /**
  * Bonbons

@@ -14,7 +14,6 @@ import {
   BonbonsPipeEntry as PipeEntry,
   UnionBonbonsResult as IResult,
   IBonbonsControllerMetadata as ControllerMetadata,
-  IBonbonsMethodResult as SyncResult,
   KOAMiddlewareTuple as MiddlewareTuple,
   ReadonlyDIContainer as ReadonlyDI,
   IMethodResult,
@@ -33,7 +32,6 @@ import {
   InjectToken,
   ScopeID
 } from "@bonbons/contracts/dist/src/private-api";
-import { getDependencies, ConfigCollection, DIContainer } from "@bonbons/di/dist/src/private-api";
 import {
   ColorsHelper,
   COLORS,
@@ -57,11 +55,14 @@ import {
   TEXT_FORM_OPTIONS,
   URL_FORM_OPTIONS,
   ENV_MODE,
-  DEPLOY_MODE
-} from "@bonbons/di";
+  DEPLOY_MODE,
+  ConfigCollection,
+  DIContainer,
+  getDependencies
+} from "./di";
 import { invalidOperation, invalidParam, TypeCheck, TypedSerializer, UUID } from "@bonbons/utils";
 import { Context } from "@bonbons/controllers";
-import { Options as DEFAULTS } from "@bonbons/options";
+import { Options as DEFAULTS } from "./options";
 import {
   Logger,
   InjectService,
