@@ -1,5 +1,6 @@
 import { Async, Constructor } from "@bonbons/contracts";
 import * as c from "@bonbons/contracts/dist/src/private-api";
+import { PipeProcessResult } from "@bonbons/contracts/dist/src/private-api";
 
 /**
  * Base BONBONS Pipe
@@ -19,7 +20,7 @@ export abstract class PipeMiddleware<T = any> implements c.IPipe<T> {
   public readonly params!: T;
   constructor() { }
   public readonly context!: c.IBonbonsContext;
-  abstract process(): Async<void> | void;
+  abstract process(): Async<PipeProcessResult> | PipeProcessResult;
 }
 
 /**
