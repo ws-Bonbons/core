@@ -27,17 +27,17 @@ function registerCompelete(meta) {
     // console.log(JSON.stringify(meta.router.routes, null, "\t"));
     Object.keys(meta.router.routes).map(key => meta.router.routes[key]).forEach(route => {
         const { middlewares: mms, pipes: mps } = meta;
-        const { middlewares, pipes } = route;
-        if (middlewares && middlewares.merge) {
+        const { middlewares = { list: [], merge: false }, pipes = { list: [], merge: false } } = route;
+        if (middlewares.merge) {
             route.middlewares.list = [...mms, ...middlewares.list];
         }
-        else if (!middlewares) {
-            route.middlewares = { list: [...route.middlewares.list], merge: false };
+        else {
+            route.middlewares = { list: [...middlewares.list], merge: false };
         }
-        if (pipes && pipes.merge) {
+        if (pipes.merge) {
             route.pipes.list = [...mps, ...pipes.list];
         }
-        else if (!pipes) {
+        else {
             route.pipes = { list: [...pipes.list], merge: false };
         }
     });
