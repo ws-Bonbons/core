@@ -26,17 +26,19 @@ exports.Controller = Controller;
 function registerCompelete(meta) {
     // console.log(JSON.stringify(meta.router.routes, null, "\t"));
     Object.keys(meta.router.routes).map(key => meta.router.routes[key]).forEach(route => {
-        if (route.middlewares && route.middlewares.merge) {
-            route.middlewares.list = [...meta.middlewares, ...route.middlewares.list];
+        const { middlewares: mms, pipes: mps } = meta;
+        const { middlewares, pipes } = route;
+        if (middlewares && middlewares.merge) {
+            route.middlewares.list = [...mms, ...middlewares.list];
         }
-        else if (!route.middlewares) {
-            route.middlewares = { list: [...meta.middlewares], merge: false };
+        else if (!middlewares) {
+            route.middlewares = { list: [...route.middlewares.list], merge: false };
         }
-        if (route.pipes && route.pipes.merge) {
-            route.pipes.list = [...meta.pipes, ...route.pipes.list];
+        if (pipes && pipes.merge) {
+            route.pipes.list = [...mps, ...pipes.list];
         }
-        else if (!route.pipes) {
-            route.pipes = { list: [...meta.pipes], merge: false };
+        else if (!pipes) {
+            route.pipes = { list: [...pipes.list], merge: false };
         }
     });
     return meta;
