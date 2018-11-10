@@ -212,9 +212,9 @@ export class MainController extends BaseController {
 
     @Method("GET", "POST")
     @Route("/index2")
-    @Middleware([middleware02(33333)], false) 
-    // merge:true(default), will extends controller middlewares list : [middleware01(), middleware02(33333)]
-    // merge:false, will not extends controller middlewares list : [middleware02(555)]
+    @Middleware([middleware02(33333)], true) 
+    // merge:false(default), will extends controller middlewares list : [middleware02(33333)]
+    // merge:true, will not extends controller middlewares list : [middleware01(), middleware02(555)]
     public ApiIndex(): JsonResult {
         return new JsonResult({ value: this.sup.print() });
     }
@@ -270,7 +270,7 @@ public async GetIndex(): StringResult {
 // there are two ways to access the form data
     @Method("POST")
     @Route("/post")
-    @Middleware([], false)
+    @Middleware([], true)
     public POSTIndex(name:string, @FromBody() params: any): JsonResult {
         console.log("this is a post method");
         const form = this.context.form;
