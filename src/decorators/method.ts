@@ -8,7 +8,7 @@ export function initRoutes(reflect: c.IBonbonsControllerMetadata, propertyKey: s
   return reflect.router.routes[propertyKey] || (reflect.router.routes[propertyKey] = <any>{});
 }
 
-export function reroute(reflect: c.IBonbonsControllerMetadata, propertyKey: string, payload: any) {
+export function reroute(reflect: c.IBonbonsControllerMetadata, propertyKey: string, payload: Partial<c.IRoute>) {
   Object.assign(initRoutes(reflect, propertyKey), payload);
   return reflect;
 }

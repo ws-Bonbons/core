@@ -85,7 +85,14 @@ import {
 } from "./plugins/public-api";
 import { Injectable } from "./decorators";
 
-const { red, green, yellow, cyan, blue, magenta } = ColorsHelper;
+import get from "lodash/get";
+
+const {
+  green: GREEN,
+  yellow: YELLOW,
+  cyan: CYAN,
+  blue: BLUE
+} = ColorsHelper;
 
 export abstract class BaseApp {
   protected readonly logger: Logger;
@@ -576,7 +583,7 @@ export class BonbonsServer implements IServer {
     const env = this.$confColls.get(ENV_MODE);
     this.$logger = new LoggerConstructor(env);
     this.singleton(Logger, () => this.$logger);
-    this.$logger.debug("core", caller, `logger init : [ type -> ${green(Logger.name)} ].`);
+    this.$logger.debug("core", caller, `logger init : [ type -> ${GREEN(Logger.name)} ].`);
     this.$logger.debug("core", caller, "-----------------------");
   }
 
@@ -601,23 +608,23 @@ export class BonbonsServer implements IServer {
   private $$initDIContainer(): void {
     const caller = "$$initDIContainer";
     this.$logger.debug("core", caller, "init DI container.");
-    this.$logger.debug("core", caller, `renew inject entry count : [ ${green(this._renews.length)} ].`);
+    this.$logger.debug("core", caller, `renew inject entry count : [ ${GREEN(this._renews.length)} ].`);
     this._renews.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.New);
-      this.$logger.trace("core", caller, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", caller, `relation add : [ @${CYAN((<any>tk).name)} -> @${BLUE(logInjectImp(imp))} ].`);
     });
-    this.$logger.debug("core", caller, `scoped inject entry count : [ ${green(this._scopeds.length)} ].`);
+    this.$logger.debug("core", caller, `scoped inject entry count : [ ${GREEN(this._scopeds.length)} ].`);
     this._scopeds.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.Scope);
-      this.$logger.trace("core", caller, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", caller, `relation add : [ @${CYAN((<any>tk).name)} -> @${BLUE(logInjectImp(imp))} ].`);
     });
-    this.$logger.debug("core", caller, `singleton inject entry count : [ ${green(this._singletons.length)} ].`);
+    this.$logger.debug("core", caller, `singleton inject entry count : [ ${GREEN(this._singletons.length)} ].`);
     this._singletons.forEach(([tk, imp]) => {
       this.$$injectaFinally(tk, imp, InjectScope.Singleton);
-      this.$logger.trace("core", caller, `relation add : [ @${cyan((<any>tk).name)} -> @${blue(logInjectImp(imp))} ].`);
+      this.$logger.trace("core", caller, `relation add : [ @${CYAN((<any>tk).name)} -> @${BLUE(logInjectImp(imp))} ].`);
     });
     this.$di.complete();
-    this.$logger.debug("core", caller, `complete with di container : [ total injectable count -> ${green(this.$di.count)} ].`);
+    this.$logger.debug("core", caller, `complete with di container : [ total injectable count -> ${GREEN(this.$di.count)} ].`);
     this.$logger.debug("core", caller, "-----------------------");
   }
 
@@ -645,14 +652,14 @@ export class BonbonsServer implements IServer {
 
   private $$useRouters(): void {
     const caller = "$$useRouters";
-    this.$logger.debug("core", caller, `start build routers : [ count -> ${green(this._ctlrs.length)} ]`);
+    this.$logger.debug("core", caller, `start build routers : [ count -> ${GREEN(this._ctlrs.length)} ]`);
     const mainRouter = new KOARouter();
     this._ctlrs.forEach(controllerClass => {
       const proto = controllerClass.prototype;
       const { router } = <ControllerMetadata>(proto.getConfig && proto.getConfig());
       const thisRouter = new KOARouter({ prefix: router.prefix as string });
       this.$logger.debug("core", caller,
-        `register ${yellow(controllerClass.name)} : [ @prefix -> ${cyan(router.prefix)} @methods -> ${COLORS.green}${Object.keys(router.routes).length}${COLORS.reset} ]`);
+        `register ${YELLOW(controllerClass.name)} : [ @prefix -> ${CYAN(router.prefix)} @methods -> ${COLORS.green}${Object.keys(router.routes).length}${COLORS.reset} ]`);
       Object.keys(router.routes).forEach(methodName => {
         const item = router.routes[methodName];
         const { allowMethods } = item;
@@ -675,7 +682,7 @@ export class BonbonsServer implements IServer {
     const { list: pipelist } = pipes;
     const { list: mdsList } = mds;
     this.$logger.trace("core", caller,
-      `add route : [ ${green(method)} ${blue(item.path)} @params -> ${cyan(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
+      `add route : [ ${GREEN(method)} ${BLUE(item.path)} @params -> ${CYAN(item.funcParams.map(i => i.key).join(",") || "...")} ]`);
     const middlewares: KOAMiddleware[] = [...(mdsList || [])];
     const preMiddles = this.$$preparePipes();
     this.$$addPipeMiddlewares(pipelist, middlewares);
@@ -732,14 +739,14 @@ export class BonbonsServer implements IServer {
     });
   }
 
-  private $$parseFuncParams(ctx: KOAContext, route: IRoute): any[] {
-    const querys = (route.funcParams || []).filter(i => i.key !== null).map(({ key, type, isQuery }) => {
+  private $$parseFuncParams(ctx: KOAContext, { funcParams, form }: IRoute): any[] {
+    const querys = (funcParams || []).filter(i => i.key !== null).map(({ key, type, isQuery }) => {
       const pack = isQuery ? ctx.query : (<any>ctx).params;
       return !type ? pack[key] : type(pack[key]);
     });
-    if (route.form && route.form.index >= 0) {
-      const { index } = route.form;
-      const staticType = (route.funcParams || [])[index];
+    if (form && form.index >= 0) {
+      const { index } = form;
+      const staticType = (funcParams || [])[index];
       const resolver = this.$confColls.get(STATIC_TYPED_RESOLVER);
       querys[index] = !!(resolver && staticType && staticType.type) ?
         resolver.FromObject(ctx.request.body, staticType.type) :
@@ -766,21 +773,12 @@ export class BonbonsServer implements IServer {
 }
 
 function logInjectImp(imp: any) {
-  if (imp.name) {
-    return imp.name;
-  }
-  if (Object.prototype.toString.call(imp.__proto__) === "[object Function]") {
-    return "[factory]";
-  }
-  if (imp.__proto__.constructor) {
-    return imp.__proto__.constructor.name;
-  }
+  if (!imp) return "[undefined]";
+  if (imp.name) return imp.name;
+  if (Object.prototype.toString.call(imp.__proto__) === "[object Function]") return "[factory]";
+  if (get(imp, "__proto__", {}).constructor) return get(imp, "__proto__.constructor.name", "[unknown]");
   return "[instance]";
 }
-
-// function getRequestContext(ctx: KOAContext) {
-//   return ctx.state["$$ctx"] || (ctx.state["$$ctx"] = new Context(ctx));
-// }
 
 function resolvePipeList(list: PipeEntry[]) {
   return (list || []).map(ele => {
@@ -812,7 +810,6 @@ function resolveFormParser(middlewares: any[], route: IRoute, configs: ConfigsCo
 }
 
 function resolveParser(type: FormType, configs: ConfigsCollection, options?: BaseFormOptions) {
-  // console.log(options);
   switch (type) {
     // case FormType.MultipleFormData:
     //     return MultiplePartParser().any();
@@ -829,14 +826,12 @@ function resolveParser(type: FormType, configs: ConfigsCollection, options?: Bas
 }
 
 function resolveParserOptions<T>(key: Token<T>, configs: ConfigsCollection, options: Partial<BaseFormOptions>): KOAMiddleware {
-  // console.log(options);
   const { type, extends: extendsV } = options;
   (<any>options).enableTypes = [type];
   const etx = (<Partial<KOABodyParseOptions>>options).extendTypes = {};
   etx[(<string>type)] = extendsV || [];
   delete options.type;
   delete options.extends;
-  // console.log(JSON.stringify(Object.assign(configs.get(key) || {}, options)));
   return KOABodyParser(Object.assign(configs.get(key) || {}, options));
 }
 
@@ -866,7 +861,7 @@ function requestScopeStart(logger: Logger, di: SourceDI) {
     const scopeId = ctx.state["$$scopeId"] = UUID.Create();
     di.createScope(scopeId, { ctx });
     logger.debug(
-      "core", "requestScopeStart", `${blue(ctx.request.method)} ${cyan(ctx.request.url)} ${yellow(ctx.state["$$scopeId"].substring(0, 8))}`);
+      "core", "requestScopeStart", `${BLUE(ctx.request.method)} ${CYAN(ctx.request.url)} ${YELLOW(ctx.state["$$scopeId"].substring(0, 8))}`);
     await next();
   };
 }

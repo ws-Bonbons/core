@@ -60,10 +60,11 @@ function formDecoratorFactory(parser: FormType, config?: string | Partial<BaseFo
   return function <T extends c.IBonbonsController>(target: T, propertyKey: string, index_descriptor: number | TypedPropertyDescriptor<T>) {
     const isParam = typeof index_descriptor === "number" && index_descriptor >= 0;
     const reflect = d.Reflection.GetControllerMetadata(target);
-    if (isParam) {
-      d.Reflection.SetControllerMetadata(target, reroute(reflect, propertyKey, { form: { parser, options: configs, index: <number>index_descriptor } }));
-    } else {
-      d.Reflection.SetControllerMetadata(target, reroute(reflect, propertyKey, { form: { parser, options: configs } }));
-    }
+    const form = {
+      parser,
+      options: <any>configs,
+      index: isParam ? <number>index_descriptor : -1
+    };
+    d.Reflection.SetControllerMetadata(target, reroute(reflect, propertyKey, { form }));
   };
 }
