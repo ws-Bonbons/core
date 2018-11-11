@@ -30,12 +30,12 @@ function formDecoratorFactory(parser, config) {
     return function (target, propertyKey, index_descriptor) {
         const isParam = typeof index_descriptor === "number" && index_descriptor >= 0;
         const reflect = d.Reflection.GetControllerMetadata(target);
-        if (isParam) {
-            d.Reflection.SetControllerMetadata(target, method_1.reroute(reflect, propertyKey, { form: { parser, options: configs, index: index_descriptor } }));
-        }
-        else {
-            d.Reflection.SetControllerMetadata(target, method_1.reroute(reflect, propertyKey, { form: { parser, options: configs } }));
-        }
+        const form = {
+            parser,
+            options: configs,
+            index: isParam ? index_descriptor : -1
+        };
+        d.Reflection.SetControllerMetadata(target, method_1.reroute(reflect, propertyKey, { form }));
     };
 }
 //# sourceMappingURL=forms.js.map

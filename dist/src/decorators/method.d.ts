@@ -2,7 +2,7 @@
 import { Constructor } from "@bonbons/contracts";
 import * as c from "@bonbons/contracts/dist/src/private-api";
 export declare function initRoutes(reflect: c.IBonbonsControllerMetadata, propertyKey: string): c.IRoute;
-export declare function reroute(reflect: c.IBonbonsControllerMetadata, propertyKey: string, payload: any): c.IBonbonsControllerMetadata;
+export declare function reroute(reflect: c.IBonbonsControllerMetadata, propertyKey: string, payload: Partial<c.IRoute>): c.IBonbonsControllerMetadata;
 /**
  *  Define a route method for the controller. default allowed method is 'GET'.
  * @description

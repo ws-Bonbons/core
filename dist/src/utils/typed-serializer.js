@@ -5,17 +5,24 @@ exports.Serialize = cerialize_1.serializeAs;
 exports.Deserialize = cerialize_1.deserializeAs;
 exports.Extends = cerialize_1.inheritSerialization;
 class TypedSerializerCreator {
-    ToJSON(obj, format = false) {
-        return JSON.stringify(cerialize_1.Serialize(obj), null, format ? "  " : 0);
+    ToJSON(obj, options) {
+        if (options === undefined)
+            options = { format: false };
+        if (typeof options === "boolean")
+            options = { format: options };
+        return JSON.stringify(cerialize_1.Serialize(obj, options.type), null, options.format ? "  " : 0);
     }
-    // tslint:disable-next-line:ban-types
     FromJSON(json, type) {
         return !type ?
             cerialize_1.Deserialize(JSON.parse(json)) :
             cerialize_1.GenericDeserialize(JSON.parse(json), type);
     }
-    ToObject(obj, format = false) {
-        return cerialize_1.Serialize(obj);
+    ToObject(obj, options) {
+        if (options === undefined)
+            options = { format: false };
+        if (typeof options === "boolean")
+            options = { format: options };
+        return cerialize_1.Serialize(obj, options.type);
     }
     // tslint:disable-next-line:ban-types
     FromObject(json, type) {

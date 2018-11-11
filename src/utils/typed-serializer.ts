@@ -5,24 +5,28 @@ import {
 } from "cerialize";
 import {
   Constructor,
-  IStaticTypedResolver
+  IStaticTypedResolver,
+  IStaticSerializeOptions
 } from "@bonbons/contracts";
 
 export class TypedSerializerCreator implements IStaticTypedResolver {
 
-  public ToJSON(obj: any, format = false): string {
-    return JSON.stringify(Serialize(obj), null, format ? "  " : 0);
+  public ToJSON<T = any>(obj: any, options?: boolean | Partial<IStaticSerializeOptions<T>>): string {
+    if (options === undefined) options = { format: false };
+    if (typeof options === "boolean") options = { format: options };
+    return JSON.stringify(Serialize(obj, options.type), null, options.format ? "  " : 0);
   }
 
-  // tslint:disable-next-line:ban-types
-  public FromJSON<T>(json: string, type?: Constructor<T>): T {
+  public FromJSON<T = any>(json: string, type?: Constructor<T>): T {
     return !type ?
       Deserialize(JSON.parse(json)) as T :
       GenericDeserialize(JSON.parse(json), type) as T;
   }
 
-  public ToObject(obj: any, format = false): any {
-    return Serialize(obj);
+  public ToObject<T = any>(obj: any, options?: boolean | Partial<IStaticSerializeOptions<T>>): any {
+    if (options === undefined) options = { format: false };
+    if (typeof options === "boolean") options = { format: options };
+    return Serialize(obj, options.type);
   }
 
   // tslint:disable-next-line:ban-types
