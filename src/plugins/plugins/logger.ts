@@ -7,10 +7,30 @@ export const GLOBAL_LOGGER: Token<Constructor<GlobalLogger>> = createToken<Const
 
 export abstract class GlobalLogger {
   constructor(env: IENV) { }
+
+  abstract trace(module: string, caller: string, message: string, more?: any): void;
+  abstract trace(caller: string, message: string, more?: any): void;
+  abstract trace(message: string, more?: any): void;
   abstract trace(...msgs: any[]): void;
+
+  abstract debug(module: string, caller: string, message: string, more?: any): void;
+  abstract debug(caller: string, message: string, more?: any): void;
+  abstract debug(message: string, more?: any): void;
   abstract debug(...msgs: any[]): void;
+
+  abstract info(module: string, caller: string, message: string, more?: any): void;
+  abstract info(caller: string, message: string, more?: any): void;
+  abstract info(message: string, more?: any): void;
   abstract info(...msgs: any[]): void;
+
+  abstract warn(module: string, caller: string, message: string, more?: any): void;
+  abstract warn(caller: string, message: string, more?: any): void;
+  abstract warn(message: string, more?: any): void;
   abstract warn(...msgs: any[]): void;
+
+  abstract error(module: string, caller: string, message: string, more?: any): void;
+  abstract error(caller: string, message: string, more?: any): void;
+  abstract error(message: string, more?: any): void;
   abstract error(...msgs: any[]): void;
 }
 

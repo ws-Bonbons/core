@@ -655,8 +655,9 @@ export class BonbonsServer implements IServer {
     this.$logger.debug("core", caller, `start build routers : [ count -> ${GREEN(this._ctlrs.length)} ]`);
     const mainRouter = new KOARouter();
     this._ctlrs.forEach(controllerClass => {
-      const proto = controllerClass.prototype;
-      const { router } = <ControllerMetadata>(proto.getConfig && proto.getConfig());
+      const proto = controllerClass.prototype || {};
+      if (!proto.getConfig) throw invalidOperation(`invalid controller [${CYAN(controllerClass.name || "unknown-controller")}], you must set a HTTP method for a route.`);
+      const { router } = <ControllerMetadata>(proto.getConfig());
       const thisRouter = new KOARouter({ prefix: router.prefix as string });
       this.$logger.debug("core", caller,
         `register ${YELLOW(controllerClass.name)} : [ @prefix -> ${CYAN(router.prefix)} @methods -> ${COLORS.green}${Object.keys(router.routes).length}${COLORS.reset} ]`);
