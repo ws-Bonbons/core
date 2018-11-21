@@ -1,40 +1,38 @@
 # PROJECT Bonbons.koa
-> a static-typed koa2 framework with typescript.
+> 一个以koa2为底，用typescript设计的IoC框架.
 
-This is an MVC framework based on node.js and koa2 (old version is based on express). The framework is created by typescript, which includes a dependency injection system and RESTful high-level abstraction.
+其实没什么太多可以的描述，Bonbons纯粹依照静态语言风格来设计，包括不仅限于静态类型依赖注入能力，线性请求管道中间件，高可配置容器，静态路由与表单参数和传统的RESTful风格路由支持.
 
-The core features are under development. Currently, the dependency injection system is basically completed, the controller module is basically completed, and the GET method is also completed. 
+核心功能仍在开发中，而且目前看来进度缓慢- -。
 
 [![Build Status](https://travis-ci.org/ws-Bonbons/core.svg?branch=master)](https://travis-ci.org/ws-Bonbons/core)
 [![package version](https://badge.fury.io/js/%40bonbons%2Fcore.svg)](https://badge.fury.io/js/%40bonbons%2Fcore.svg)
-
-**Bonbons.koa is still in developing**.
 
 [Bonbons.express](https://github.com/ws-node/Bonbons)
 
 [More about Bonbons(express version)](https://github.com/mogician-notes/blog/blob/master/en-US/about_bonbons.md)
 
-## Installation
+## 安装
 ```powershell
 $ npm install @bonbons/core --save
 ```
 
-## How it works?
-#### 1. Create an app
+## Bonbons如何工作?
+#### 1. 创建app
 ```Javascript
-// 1. use constructor
+// 1. 直接使用构造
 new Bonbons()
     .option(DEPLOY_MODE, { port: 5678 });
     .start();
-// 2. use static property
+// 2. 使用静态属性
 Bonbons.New
     .option(DEPLOY_MODE, { port: 5678 });
     .start();
-// 3. use static method
+// 3. 使用静态方法
 Bonbons.Create()
     .option(DEPLOY_MODE, { port: 5678 });
     .start();
-// 4. use decorator
+// 4. 定义构造
 @BonbonsApp({
     options: [
         { token: DEPLOY_MODE, value: { port: 5678 } }
@@ -49,7 +47,7 @@ class MyApp extends BaseApp {
 
  new MyApp().start();
 ```
-#### 2. Create a service
+#### 2. 创建一个service
 ```JavaScript
 @Injectabe()
 export class SecService {
@@ -59,7 +57,7 @@ export class SecService {
     }
 }
 
-// 1.inject directly
+// 1. 直接注册
 new Bonbons()
     .scoped(SecService)
 //    .scoped(SecService, new SecService())
@@ -67,7 +65,7 @@ new Bonbons()
 //    .singleton(SecService)
     .option(DEPLOY_MODE, { port: 5678 });
     .start();
-// or use decorator
+// 或者进行定义
 @BonbonsApp({
 //    singleton: [ SecService ],
     scoped: [ SecService ]
@@ -77,13 +75,13 @@ new Bonbons()
 })
 // ...
 
-// 2. use interface injection
-// define a ABC
+// 2. 接口-实现注册
+// 定义抽象类
 export abstract class ABCService {
     abstract getMessage(): string;
 }
 
-// then extends ABC and implements methods
+// 使用接口实现来继承抽象类，不需要生产真实继承链
 @Injectabe()
 export class MainService implements ABCService {
 
@@ -98,7 +96,7 @@ export class MainService implements ABCService {
 
 }
 
-// then inject them
+// 然后进行注册
 new Bonbons()
     .scoped(SecService)
     .scoped(ABCService, MainService)
@@ -122,10 +120,10 @@ new Bonbons()
 })
 // ...
 
-// use call the service by constructor injection or dependency lookup in other services , pipes and constrollers.
+// 目前支持在控制器、服务、和管道中，使用构造函数注入或者依赖查找来获取实例.
 ```
 
-#### 3. Create a controller
+#### 3. 创建控制器controller
 ```JavaScript
 @Controller("api")
 export class MainController extends BaseController {
@@ -146,8 +144,8 @@ export class MainController extends BaseController {
 
     @Method("GET")
     @Route("/page?{id}&{select}&{message}") 
-    // provide query params name list to open static query feature
-    // example : localhost/api/page?id=123456&select=true&message=mmmmmm
+    // 提供路由参数占位符列表来开启静态路由参数功能，确保函数参数数量和顺序与之保持一致
+    // 举例 : localhost/api/page?id=123456&select=true&message=mmmmmm
     public AnotherGET(id:number, select:boolean, message): JsonResult {
         console.log(id); // 123456
         console.log(select); // true
@@ -162,16 +160,16 @@ export class MainController extends BaseController {
 
 ...
 
-// register controller
+// 注册controller
 Bonbons.Create()
     .scoped(SecService)
     .controller(MainController);
 ```
 
-#### 4. Add middlewares or pipe for route or controller (not completed in koa beta version)
+#### 4. 使用koa中间件或者线性管道 (可能存在变更，koa中间件可能在未来删除直接支持)
 ```JavaScript
-// 1 : Middlewares like express style
-// first create middleware in pure function format.
+// 1 : koa风格中间件
+// 纯函数构建模式.
 const middleware01 = () => {
     return async (ctx, next) => {
         console.log("123456");
@@ -185,7 +183,7 @@ const middleware02 = (param) => {
     };
 }
 
-// then add it to method by decorator
+// 使用装饰器定制
 @Method("GET", "POST")
 @Route("/index")
 @Middlewares([middleware02(55555)])
@@ -193,8 +191,8 @@ public ApiIndex(): JsonResult {
     return new JsonResult({ value: this.sup.print() });
 }
 
-// this decorator is alse can be add in controller
-// the middlewares add to controller will add to all the registeres methods, but you can still rewrite this behavior.
+// 可以在控制器上进行router级别定义
+// 所有路由方法将默认继承，当然你也可以在路由上重写它们
 @Controller("api")
 @Middlewares([middleware01()])
 export class MainController extends BaseController {
@@ -213,15 +211,15 @@ export class MainController extends BaseController {
     @Method("GET", "POST")
     @Route("/index2")
     @Middleware([middleware02(33333)], true) 
-    // merge:false(default), will extends controller middlewares list : [middleware02(33333)]
-    // merge:true, will not extends controller middlewares list : [middleware01(), middleware02(555)]
+    // merge:false(默认), 覆盖router的中间件定义 : [middleware02(33333)]
+    // merge:true, 继承router的中间件定义 : [middleware01(), middleware02(555)]
     public ApiIndex(): JsonResult {
         return new JsonResult({ value: this.sup.print() });
     }
 
 }
 
-// 2. Bonbons pipes
+// 2. Bonbons线性管道
 interface PipeDate {
   value: number;
   name: string;
@@ -229,12 +227,6 @@ interface PipeDate {
 
 @Pipe()
 class PIpeClass2 extends PipeMiddleware<PipeDate> implements PipeOnInit {
-
-  @Param()
-  private value: number;
-
-  @Param("name")
-  private vName: string;
 
   constructor(private logger: GlobalLogger) {
     super();
@@ -244,18 +236,17 @@ class PIpeClass2 extends PipeMiddleware<PipeDate> implements PipeOnInit {
     // console.log(this.params);
   }
 
-  async process(next: () => Promise<any>): void | Promise<void> {
+  async process(): void | Promise<void> {
     console.log(this.vName);
     console.log(this.params);
     this.logger.debug("process in pipe [ WrappedPipe ]");
-    await next();
   }
 
 }
 
 export const WrappedPipe = PipeFactory.generic(PIpeClass2);
 
-// then add to route method
+// 在需要的地方定义
 @Method("GET")
 @Route("/index")
 @Pipes([WrappedPipe({name: "aaa", value: 123456})])
@@ -265,9 +256,11 @@ public async GetIndex(): StringResult {
 }
 ```
 
-#### 5. Form control
+> pipe追求的是纯粹的流水线式风格。pipe在请求过程中总是保持同步顺序调用，依赖依赖注入能力可以在各个管道之间共享状态
+
+#### 5. 表单控制
 ```JavaScript
-// there are two ways to access the form data
+// 有两种定义表单类型的方式
     @Method("POST")
     @Route("/post")
     @Middleware([], true)
@@ -289,19 +282,19 @@ public async GetIndex(): StringResult {
     /*
     * All supported decorators :
     * @FromBody()   -   default : application/json
-    * @FormData()   -   default : multiple/form-data (not completed in koa version)
+    * @FormData()   -   default : multiple/form-data (未完成)
     * @FromForm()   -   default : application/x-www-form-urlencoded
-    * @RawBody()   -   default : application/octet-stream (not completed in koa version)
+    * @RawBody()   -   default : application/octet-stream (未完成)
     * @TextBody()   -   default : text/plain
     */
 
-   // static-typed form params will be introduced later.
+   // 下面介绍的静态类型表单会自动完成类型映射，功能强大但同时意味着更高的性能开销。
 ```
 
-#### 6.Multiple injections with POST/PUT
+#### 6.强大的静态类型表单实现POST/PUT
 ```JavaScript
 // create a static-type model to describe form structure:
-import { Serialize, Deserialize } from "bonbons";
+import { Serialize, Deserialize } from "@bonbons/core";
 
 // model to describe the form data structure
 export class PostModel {
@@ -383,7 +376,7 @@ export class PostModel {
 */
 ```
 
-#### 7. Async method
+#### 7. 异步路由
 ```JavaScript
     @Method("GET")
     @Route("/index")
@@ -403,11 +396,11 @@ export class PostModel {
         return this.sup.print();
     }
 
-    // it works!
-    // Async<T> = Promise<T>, only an alias.
+    // it works
+    // Async<T> = Promise<T>|T, not only an alias.
 ```
 
-#### 8. String encoding support
+#### 8. 字符串编码
 ```JavaScript
     @Method("GET")
     @Route("/index")
@@ -423,5 +416,5 @@ export class PostModel {
     // "woshinidie : 我是你爹"
 ```
 
-**Still in developing...**
+**数据库驱动、日志、模块隔离等其余功能还在开发中...**
 
