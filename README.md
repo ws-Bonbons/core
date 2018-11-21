@@ -228,12 +228,6 @@ interface PipeDate {
 @Pipe()
 class PIpeClass2 extends PipeMiddleware<PipeDate> implements PipeOnInit {
 
-  @Param()
-  private value: number;
-
-  @Param("name")
-  private vName: string;
-
   constructor(private logger: GlobalLogger) {
     super();
   }
